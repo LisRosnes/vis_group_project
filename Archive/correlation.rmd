@@ -1,0 +1,191 @@
+# Correlating Infant Mortalities Per County: Binge Drinking, Median Income, Obesity
+
+Both pearsons and spearmans correlation showed similar findings which are outlined below:
+
+**Binge Drinking** While a negative non linear relationship was established with a p value less than 0.05, (more binge drinking correlates to less infant mortalities) this is a good example that correlation does not always equal causation
+
+**Income** A moderate negative linear relationship between infant mortality and median income with an extremely small p-value confirming statistically significant correlation. A higher Income correlates with lower mortality rates
+
+**Obesity** Moderate positive linear relationship between infant mortality and obesity. Very small p value again, statistically significant.
+
+```{r}
+
+setwd("C:/Users/elisa/Documents/Emory/Spring 2025/vis/group_project") 
+data <- read.csv("merged_output.csv", stringsAsFactors = FALSE)
+
+head(data)
+str(data)
+
+# pairwise correlation
+
+summary(data$infant_mortality)
+summary(data$binge_drinking)
+
+hist(data$infant_mortality, main = "Histogram of Infant Mortality", xlab = "Infant Mortality")
+shapiro.test(data$infant_mortality)
+
+# WE TESTED BOTH SPEARMAN AND PEARSON'S CORRELATION, BOTH HAD SIMILAR RESULTS
+cor_test_binge <- cor.test(data$infant_mortality, data$binge_drinking, method = "spearman")
+print(cor_test_binge)
+
+# b. Correlation between infant_mortality and median_income
+cor_test_income <- cor.test(data$infant_mortality, data$median_income, method = "spearman")
+print(cor_test_income)
+
+# c. Correlation between infant_mortality and obesity
+cor_test_obesity <- cor.test(data$infant_mortality, data$obesity, method = "spearman")
+print(cor_test_obesity)
+
+
+```
+
+# Visualizing Income and Infant Mortality (Linear Regression)
+
+```{r}
+# --------------------
+# VISUALIZING MEDIAN INCOME AND INFANT MORTALITY RELATIONSHIP VIA REGRESSION
+model <- lm(infant_mortality ~ median_income, data = data)
+
+# Display the summary of the model
+summary(model)
+
+# Basic scatter plot with a regression line
+plot(jitter(data$median_income), jitter(data$infant_mortality),
+     main = "Infant Mortality vs. Median Income",
+     xlab = "Median Income",
+     ylab = "Infant Mortality")
+
+# Add the regression line in red
+abline(model, col = "red", lwd = 2)
+
+```
+
+# Comparison Between Counties with High Population vs Low Population of Blacks
+
+A t test was performed comparing infant mortality rates between two groupings of Black population (high and low based on median)
+
+**Results**
+
+Higher percentage of Black residents: average infant death rate was 6.6
+
+Lower percentage of Black residents: average infant mortality rate was 5.9
+
+```{r}
+
+new_df <- read.csv("merged_output.csv")
+
+head(new_df)
+
+summary(new_df$'Black.including.Hispanic')
+
+# Create a grouping variable: high vs. low percentage of Black population
+median_black <- median(new_df$'Black.including.Hispanic', na.rm = TRUE)
+new_df$Black_group <- ifelse(new_df$'Black.including.Hispanic' >= median_black, "High", "Low")
+
+# Use a t-test to compare infant mortality rates between the two groups
+t_test_result <- t.test(infant_mortality ~ Black_group, data = new_df)
+print(t_test_result)
+
+
+
+```
+
+```{r}
+# Load required package
+library(ggplot2)
+
+# Basic scatter plot with median_income as a color gradient
+ggplot(new_df, aes(x = `Black.including.Hispanic`, y = infant_mortality, color = median_income)) +
+  geom_point(alpha = 0.7) +
+  scale_color_gradient(low = "red", high = "blue") +
+  labs(title = "Infant Mortality vs. Black Population Proportion",
+       subtitle = "Color indicates Median Income",
+       x = "Black Population Proportion (including Hispanic)",
+       y = "Infant Mortality Rate",
+       color = "Median Income") +
+  theme_minimal()
+
+
+
+```
+
+```{r}
+# Create an income group variable (quartiles)
+new_df$income_group <- cut(new_df$median_income,
+                       breaks = quantile(new_df$median_income, probs = seq(0, 1, 0.25), na.rm = TRUE),
+                       labels = c("Low", "Medium Low", "Medium High", "High"),
+                       include.lowest = TRUE)
+
+# Faceted scatter plot
+ggplot(new_df, aes(x = `Black.including.Hispanic`, y = infant_mortality)) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~ income_group) +
+  labs(title = "Infant Mortality vs. Black Population by Income Group",
+       x = "Black Population Proportion (including Hispanic)",
+       y = "Infant Mortality Rate") +
+  theme_minimal()
+
+
+
+
+
+# Create an income group variable (quartiles)
+new_df$income_group <- cut(new_df$median_income,
+                       breaks = quantile(new_df$median_income, probs = seq(0, 1, 0.25), na.rm = TRUE),
+                       labels = c("Low", "Medium Low", "Medium High", "High"),
+                       include.lowest = TRUE)
+
+# Faceted scatter plot
+ggplot(new_df, aes(x = `White.including.Hispanic`, y = infant_mortality)) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~ income_group) +
+  labs(title = "Infant Mortality vs. White Population by Income Group",
+       x = "White Population Proportion (including Hispanic)",
+       y = "Infant Mortality Rate") +
+  theme_minimal()
+
+
+
+```
+
+# Predicting infant mortality using black population and median income Using basic multiple linear regression with black including hispanic and median_income
+
+**Results**
+
+There is a higher correlation with the variable percentage of black residents than there is with median income. But the trend show higher black population and lower income will correlate to more infant deaths.
+
+There is actually a very negative correlation between percentage of Asian residents and infant death
+
+A small negative correlation between percentage of white residents and infant deaths.
+
+```{r}
+
+# Fit a model predicting infant mortality using Black population proportion and median income
+model <- lm(infant_mortality ~ `Black.including.Hispanic` + median_income + `Asian.Pacific.Islander.including.Hispanic` + `White.including.Hispanic`, data = new_df)
+summary(model)
+```
+
+#Correlating Median Income and Percentage of Black Individuals Per County
+
+```{r}
+ggplot(new_df, aes(x = `Black.including.Hispanic`, y = median_income)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", col = "red") +
+  labs(title = "Median Income vs. Proportion of Black Population",
+       x = "Proportion of Black (including Hispanic)",
+       y = "Median Income") +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(new_df, aes(x = `White.including.Hispanic`, y = median_income)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", col = "red") +
+  labs(title = "Median Income vs. Proportion of White Population",
+       x = "Proportion of White (including Hispanic)",
+       y = "Median Income") +
+  theme_minimal()
+
+
+```

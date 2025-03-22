@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>M4 Vis</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <!-- TODO add link to d3.js  -->
+      <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1 class="title">Is It Luck?</h1>
+    </header>
+    <main class="wrapper">
+      <div class="left-column">
+        <div class="left-column-content">
+          <!-- TODO Add filler verse divs so that the content is centered vertically even at the start -->
+          <ul class="verse" id="verse1">
+            <li class="line" id="line1"><strong>Is it luck?</strong></li>
+            <li class="line" id="line2">Every morning, you take in a breath.</li>
+            <li class="line" id="line3">You walk outside, the sun on your flesh.</li>
+            <li class="line" id="line4">You get to laugh, you get to grow,</li>
+            <li class="line" id="line5">You get to experience life's glow</li>
+          </ul>
+
+          <ul class="verse" id="verse2">
+            <li class="line" id="line1"><strong>But is it luck?</strong></li>
+            <li class="line" id="line2">Because not every child takes that first breath,</li>
+            <li class="line" id="line3">Not every dream escapes early death.</li>
+            <li class="line" id="line4">The poorer your home, the harsher the fate.</li>
+            <li class="line" id="line5">The darker your skin, the higher the rate.</li>
+          </ul>
+
+          <ul class="verse" id="verse3">
+            <li class="line" id="line1"><strong>But is it luck?</strong></li>
+            <li class="line" id="line2">To exits--when obesity and lifestyle increase your risk--</li>
+            <li class="line" id="line3">Even though that possibility seems to fade when your parents are rich.</li>
+            <li class="line" id="line4">To truly understand the blessings of your life,</li>
+            <li class="line" id="line5">Picture how it felt for your mother if she was not white.</li>
+          </ul>
+
+          <ul class="verse" id="verse4">
+            <li class="line" id="line1"><strong>Ding, Ding, Ding. </strong> It is luck! You are lucky.</li>
+            <li class="line" id="line2">Because it's lucky when you're Black.</li>
+            <li class="line" id="line3">It's luck when you are poor</li>
+            <li class="line" id="line4">It's luck to make it out of that operating room door.</li>
+            <li class="line" id="line5">Your chances to survive seem to decrease</li>
+            <li class="line" id="line6">When the system was never built for people like <strong>You</strong> or M€</li>
+          </ul>
+
+          <ul class="verse" id="verse6">
+            <li class="line" id="line1"><strong>But F*ck Luck</strong></li>
+            <li class="line" id="line2">With every attack on reproductive care,</li>
+            <li class="line" id="line3">More futures dim, more lives left bare.</li>
+            <li class="line" id="line4">To appreciate the fruits of life that were endowed,</li>
+            <li class="line" id="line5">You must stand up, speak up, and dream out loud.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="right-column">
+        <svg id="svg"></svg>
+      </div>
+    </main>
+    <footer>
+      <button class="arrow-button" id="backward-button">◄</button>
+      <button class="arrow-button" id="forward-button">►</button>
+    </footer>
+    <script src="main.js"></script>
+  </body>
+</html>
