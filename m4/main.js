@@ -202,7 +202,7 @@ function stateDeathVis() {
      .append("text")
      .attr("class", "title")
      .attr("x", w / 2)
-     .attr("y", padding - 40)
+     .attr("y", -70)
      .style("text-anchor", "middle")
      .attr("font-size", "30px")
      .text("Average Infant Mortality by US State");
