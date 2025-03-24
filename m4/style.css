@@ -1,113 +1,98 @@
 /* Reset default browser styles */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  /* Body and overall typography */
-  body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    background-color: #fdfdfd;
-    color: #333;
-  }
-  
-  /* Header styles */
-  header {
-    background-color: #222;
-    color: #fff;
-    padding: 1rem;
-    text-align: center;
-  }
-  
-  /* Main container: using flex for layout */
-  .wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 1rem;
-  }
-  
-  /* Middle page styles: center the text content */
-  .middle-page {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  /* Left column styles */
-  .left-column {
-    width: 40%;
-    padding: 1rem;
-  }
-  
-  /* Right column styles */
-  .right-column {
-    width: 55%;
-    padding: 1rem;
-  }
-  
-  /* Ensure content in columns doesn't stretch too wide */
-  .left-column-content,
-  .middle-page-content {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  
-  /* Verse styling */
-  .verse {
-    list-style: none;
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-  }
-  
-  /* Line styling */
-  .line {
-    margin: 0.5rem 0;
-  }
-  
-  /* Highlight the active verse and lines */
-  .active-verse {
-    background-color: #eef;
-    border-left: 4px solid #0088cc;
-    padding-left: 0.5rem;
-  }
-  
-  .active-line {
-    font-weight: bold;
-    color: #c00;
-  }
-  
-  /* Footer styling */
-  footer {
-    text-align: center;
-    padding: 1rem;
-  }
-  
-  /* Arrow button styling */
-  .arrow-button {
-    background: #222;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 1rem;
-    margin: 0.5rem;
-    cursor: pointer;
-    font-size: 1.2rem;
-    transition: background 0.3s ease;
-  }
-  
-  .arrow-button:hover {
-    background: #555;
-  }
-  
-  /* SVG container styling */
-  #svg {
-    width: 100%;
-    height: 500px;
-    border: 1px solid #ccc;
-    background: #fff;
-  }
-  
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+ /* Body and overall typography */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #fdfdfd;
+  color: #333;
+}
+ /* Header styles */
+header {
+  background-color: #222;
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+}
+ /* Main container: using flex for layout */
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 1rem;
+}
+ /* Middle page styles: center the text content */
+.middle-page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+ /* Left column styles */
+.left-column {
+  width: 40%;
+  padding: 1rem;
+}
+ /* Right column styles */
+.right-column {
+  width: 55%;
+  padding: 1rem;
+}
+ /* Ensure content in columns doesn't stretch too wide */
+.left-column-content,
+.middle-page-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+ /* Verse styling */
+.verse {
+  list-style: none;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+ /* Line styling */
+.line {
+  margin: 0.5rem 0;
+}
+ /* Highlight the active verse and lines */
+.active-verse {
+  background-color: #eef;
+  border-left: 4px solid #0088cc;
+  padding-left: 0.5rem;
+}
+ .active-line {
+  font-weight: bold;
+  color: #c00;
+}
+ /* Footer styling */
+footer {
+  text-align: center;
+  padding: 1rem;
+}
+ /* Arrow button styling */
+.arrow-button {
+  background: #222;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: background 0.3s ease;
+}
+ .arrow-button:hover {
+  background: #555;
+}
+ /* SVG container styling */
+#svg {
+  width: 100%;
+  height: 700px;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
