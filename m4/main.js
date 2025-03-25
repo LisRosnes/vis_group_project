@@ -2,8 +2,7 @@ const CSV_FILE_PATH = "assets/data/merged_output.csv";
 let keyframes = [
  {
    activeVerse: 1,
-   activeLines: [1, 2, 3, 4, 5],
-    svgUpdate: obesityDeathVis,
+   activeLines: [1, 2, 3, 4, 5]
  },
  {
    activeVerse: 2,
