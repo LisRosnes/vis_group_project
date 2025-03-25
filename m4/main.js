@@ -50,7 +50,6 @@ const padding = 80;
 let svg = d3.select("#svg");
 let keyframeIndex = 0;
 
-
 function initialiseSVG() {
  svg
    .attr("width", w)
@@ -80,234 +79,246 @@ function initialiseSVG() {
 
 
 async function loadData() {
- try {
-   const infantMortalityData = await d3.csv(CSV_FILE_PATH);
-   if (!infantMortalityData || infantMortalityData.length === 0) {
-     throw new Error("Failed to load dataset or empty data.");
-   }
-   infantMortalityData.forEach((d) => {
-     d.infant_mortality = +d.infant_mortality;
-     d["Black including Hispanic"] = +d["Black including Hispanic"];
-     d["White including Hispanic"] = +d["White including Hispanic"];
-     d["Hispanic All Races"] = +d["Hispanic All Races"];
-     d["All Non-White Races including Hispanic"] =
-       +d["All Non-White Races including Hispanic"];
-     d["Asian/Pacific Islander including Hispanic"] =
-       +d["Asian/Pacific Islander including Hispanic"];
-     d["American Indian/Alaskan Native including Hispanic"] =
-       +d["American Indian/Alaskan Native including Hispanic"];
-     d.median_income = +d.median_income;
-     d.obesity = +d.obesity;
-   });
-   console.log("Loaded Data:", infantMortalityData);
-   return infantMortalityData;
- } catch (error) {
-   console.error("Error loading data:", error);
-   throw error;
+  try {
+    const data = await d3.csv(CSV_FILE_PATH);
+    if (!data || data.length === 0) {
+      throw new Error("Failed to load dataset or empty data.");
+    }
+    data.forEach((d) => {
+      d.infant_mortality = +d.infant_mortality;
+      d["Black including Hispanic"] = +d["Black including Hispanic"];
+      d["White including Hispanic"] = +d["White including Hispanic"];
+      d["Hispanic All Races"] = +d["Hispanic All Races"];
+      d["All Non-White Races including Hispanic"] =
+        +d["All Non-White Races including Hispanic"];
+      d["Asian/Pacific Islander including Hispanic"] =
+        +d["Asian/Pacific Islander including Hispanic"];
+      d["American Indian/Alaskan Native including Hispanic"] =
+        +d["American Indian/Alaskan Native including Hispanic"];
+      d.median_income = +d.median_income;
+      d.obesity = +d.obesity;
+    });
+    console.log("Loaded Data:", data);
+    infantMortalityData = data;  // Store data in global variable
+    return data;
+  } catch (error) {
+    console.error("Error loading data:", error);
+    throw error;
+  }
  }
-}
 
 
 function stateDeathVis() {
- d3.csv(CSV_FILE_PATH).then(function (data) {
-   // console.table(data.map(d => d.State));
-   data.forEach((d) => {
-     d.infant_mortality = +d.infant_mortality;
-   });
-
-
-   const stateData = Array.from(
-     d3.rollup(
-       data,
-       (v) => d3.mean(v, (d) => d.infant_mortality),
-       (d) => d.State
-     ),
-     ([state, avg_infant_mortality]) => ({ state, avg_infant_mortality })
-   );
-   console.table(stateData);
-
-
-   // the above transorms state data into something that looks like this
-   // [
-   //   { state: "Alabama", avgInfantMortality: 7.87 },
-   //   { state: "Alaska", avgInfantMortality: 6.50 },
-   //   // ... one object per state
-   // ]
-
-
-   initialiseSVG();
-
-
-   const xScale = d3
-     .scaleBand()
-     .domain(stateData.map((d) => d.state))
-     .range([padding, w - padding])
-     .padding(0.1);
-   const yScale = d3
-     .scaleLinear()
-     .domain([0, d3.max(stateData, (d) => d.avg_infant_mortality)])
-     .range([h - padding, padding]);
-   svg
-     .selectAll(".bar")
-     .data(stateData)
-     .enter()
-     .append("rect")
-     .attr("class", "bar")
-     .attr("x", (d) => xScale(d.state))
-     .attr("y", (d) => yScale(d.avg_infant_mortality))
-     .attr("width", xScale.bandwidth())
-     .attr("height", (d) => h - padding - yScale(d.avg_infant_mortality))
-     .attr("fill", "steelblue");
-   // .attr("fill-opacity", 0.3);
-
-
-   const xAxis = d3.axisBottom(xScale);
-   svg
-     .append("g")
-     .attr("transform", "translate(0," + (h - padding) + ")")
-     .call(xAxis)
-     .selectAll("text")
-     .attr("transform", "rotate(-45)")
-     .attr("dx", "-0.8em")
-     .attr("dy", "0.15em")
-     .style("text-anchor", "end")
-     .style("font-size", "14px");
-
-
-   const yAxis = d3.axisLeft(yScale);
-   svg.append("g").call(yAxis).selectAll("text").style("font-size", "14px");
-   svg
-     .append("text")
-     .attr("class", "x-axis-label")
-     .attr("x", w / 2)
-     .attr("y", h - 10 + 30)
-     .attr("text-anchor", "middle")
-     .attr("font-size", "20px")
-     .text("State");
-
-
-   // Add the y-axis label (rotated so it reads vertically)
-   svg
-     .append("text")
-     .attr("class", "y-axis-label")
-     .attr("x", -h / 2)
-     .attr("y", padding - 50)
-     .attr("transform", "rotate(-90)")
-     .attr("text-anchor", "middle")
-     .attr("font-size", "20px")
-     .text("Average Infant Mortality Rate (per 1,000 live births)");
-
-
-   svg
-     .append("text")
-     .attr("class", "title")
-     .attr("x", w / 2)
-     .attr("y", -70)
-     .style("text-anchor", "middle")
-     .attr("font-size", "30px")
-     .text("Average Infant Mortality by US State");
- });
-}
-
-
-function incomeDeathVis() {
- d3.csv("../merged_output.csv").then(function (data) {
-   // Convert infant_mortality to numbers
-   data.forEach((d) => {
-     d.median_income = +d.median_income;
-     d.infant_mortality = +d.infant_mortality;
-   });
-
-
-   initialiseSVG();
-
-
-   // Define xScale based on median income
-   let xScale = d3
-     .scaleLinear()
-     .domain(d3.extent(data, (d) => d.median_income))
-     .range([padding, w - padding]);
-
-
-   // Define yScale based on infant mortality
-   let yScale = d3
-     .scaleLinear()
-     .domain([0, d3.max(data, (d) => d.infant_mortality)])
-     .range([h - padding, padding]);
-
-
-   // Append circles for each data point to create scatter plot
-   svg
-     .selectAll("circle")
-     .data(data)
-     .enter()
-     .append("circle")
-     .attr("cx", (d, i) => xScale(d.median_income))
-     .attr("cy", (d) => yScale(d.infant_mortality))
-     .attr("r", 5)
-     .attr("fill", "steelblue")
-     .attr("fill-opacity", 0.3);
-
-
-   // Define and append the x-axis
-   let xAxis = d3.axisBottom(xScale);
-   svg
-     .append("g")
-     .attr("class", "x-axis")
-     .attr("transform", "translate(0," + (h - padding) + ")")
-     .call(xAxis);
-
-
-   svg
-     .append("text")
-     .attr("class", "title")
-     .attr("x", w / 2)
-     .attr("y", padding - 40)
-     .style("text-anchor", "middle")
-     .attr("font-size", "40px")
-     .text("Infant Mortality by US countys' median income");
-
-
-   // Define and append the y-axis
-   let yAxis = d3.axisLeft(yScale);
-   svg
-     .append("g")
-     .attr("class", "y-axis")
-     .attr("transform", "translate(" + padding + ",0)")
-     .call(yAxis);
-
-
-   // Add axis labels
-   svg
-     .append("text")
-     .attr("class", "x-axis-label")
-     .attr("x", w / 2)
-     .attr("y", h - 10 + 30)
-     .style("text-anchor", "middle")
-     .attr("font-size", "30px")
-     .text("Median Income ($)");
-
-
-   svg
-     .append("text")
-     .attr("class", "y-axis-label")
-     .attr("x", -h / 2)
-     .attr("y", padding - 50)
-     .attr("transform", "rotate(-90)")
-     .attr("text-anchor", "middle")
-     .attr("font-size", "30px")
-     .text("Infant Mortality Rate (per 1,000 live births)");
-
-
-   // Adjust x-axis tick labels
-   svg.selectAll(".x-axis text").style("font-size", "20px");
-
-
-   // Adjust y-axis tick labels
-   svg.selectAll(".y-axis text").style("font-size", "20px");
- });
-}
-
+  d3.csv(CSV_FILE_PATH).then(function (data) {
+    data.forEach((d) => {
+      d.infant_mortality = +d.infant_mortality;
+    });
+ 
+    const stateData = Array.from(
+      d3.rollup(
+        data,
+        (v) => d3.mean(v, (d) => d.infant_mortality),
+        (d) => d.State
+      ),
+      ([state, avg_infant_mortality]) => ({ state, avg_infant_mortality })
+    );
+ 
+    initialiseSVG();
+ 
+    const margin = { top: 80, right: 80, bottom: 60, left: 80 };
+    const width = w - margin.left - margin.right;
+    const height = h - margin.top - margin.bottom;
+ 
+    const chartArea = svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+ 
+    const xScale = d3
+      .scaleBand()
+      .domain(stateData.map((d) => d.state))
+      .range([0, width])
+      .padding(0.1);
+ 
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(stateData, (d) => d.avg_infant_mortality)])
+      .range([height, 0]);
+ 
+    // Bars
+    chartArea
+      .selectAll(".bar")
+      .data(stateData)
+      .enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("x", (d) => xScale(d.state))
+      .attr("y", (d) => yScale(d.avg_infant_mortality))
+      .attr("width", xScale.bandwidth())
+      .attr("height", (d) => height - yScale(d.avg_infant_mortality))
+      .attr("fill", "steelblue");
+ 
+    // X-axis
+    const xAxis = chartArea
+      .append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(xScale))
+      .selectAll("text")
+      .attr("transform", "rotate(-45)")
+      .attr("dx", "-0.8em")
+      .attr("dy", "0.15em")
+      .style("text-anchor", "end")
+      .style("font-size", "20px");
+ 
+    // Y-axis
+    const yAxis = chartArea.append("g").call(d3.axisLeft(yScale));
+    yAxis.selectAll("text").style("font-size", "20px");
+ 
+    // X-axis label
+    chartArea
+      .append("text")
+      .attr("class", "x-axis-label")
+      .attr("text-anchor", "middle")
+      .attr("x", width / 2)
+      .attr("y", height + 150)
+      .attr("font-size", "25px")
+      .text("State");
+ 
+    // Y-axis label
+    chartArea
+      .append("text")
+      .attr("class", "y-axis-label")
+      .attr("text-anchor", "middle")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -50)
+      .attr("x", -height / 2)
+      .attr("font-size", "25px")
+      .text("Infant Mortality Rate (per 1,000 live births)");
+ 
+    // Title
+    svg
+      .append("text")
+      .attr("class", "title")
+      .attr("text-anchor", "middle")
+      .attr("x", w / 2)
+      .attr("y", -100)
+      .attr("font-size", "30px")
+      .attr("font-weight", "bold")
+      .text("Average Infant Mortality by US State");
+  });
+ }
+ 
+ function incomeDeathVis() {
+  d3.csv(CSV_FILE_PATH).then(function (data) {
+    // Convert infant_mortality to numbers
+    data.forEach((d) => {
+      d.median_income = +d.median_income;
+      d.infant_mortality = +d.infant_mortality;
+    });
+ 
+    initialiseSVG();
+ 
+    const margin = { top: 80, right: 80, bottom: 60, left: 80 };
+    const width = w - margin.left - margin.right;
+    const height = h - margin.top - margin.bottom;
+ 
+    const chartArea = svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+ 
+    // Define xScale based on median income
+    let xScale = d3
+      .scaleLinear()
+      .domain(d3.extent(data, (d) => d.median_income))
+      .range([0, width]);
+ 
+    // Define yScale based on infant mortality
+    let yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => d.infant_mortality)])
+      .range([height, 0]);
+ 
+    // Append circles for each data point to create scatter plot
+    chartArea
+      .selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", (d) => xScale(d.median_income))
+      .attr("cy", (d) => yScale(d.infant_mortality))
+      .attr("r", 5)
+      .attr("fill", "steelblue")
+      .attr("fill-opacity", 0.3);
+ 
+    // X-axis
+    const xAxis = chartArea
+      .append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(xScale));
+    xAxis.selectAll("text").style("font-size", "25px");
+ 
+    // Y-axis
+    const yAxis = chartArea.append("g").call(d3.axisLeft(yScale));
+    yAxis.selectAll("text").style("font-size", "25px");
+ 
+    // X-axis label
+    chartArea
+      .append("text")
+      .attr("class", "x-axis-label")
+      .attr("text-anchor", "middle")
+      .attr("x", width / 2)
+      .attr("y", height + 70)
+      .attr("font-size", "25px")
+      .text("Median Income ($)");
+ 
+    // Y-axis label
+    chartArea
+      .append("text")
+      .attr("class", "y-axis-label")
+      .attr("text-anchor", "middle")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -50)
+      .attr("x", -height / 2)
+      .attr("font-size", "25px")
+      .text("Infant Mortality Rate (per 1,000 live births)");
+ 
+    // Title
+    svg
+      .append("text")
+      .attr("class", "title")
+      .attr("text-anchor", "middle")
+      .attr("x", w / 2)
+      .attr("y", -100)
+      .attr("font-size", "30px")
+      .attr("font-weight", "bold")
+      .text("Infant Mortality by US Counties' Median Income");
+  });
+ }
+ 
+ function obesityDeathVis() {
+  // Following the same pattern as other visualization functions
+  initialiseSVG();
+ 
+  const margin = { top: 80, right: 200, bottom: 60, left: 80 };
+  const width = w - margin.left - margin.right;
+  const height = h - margin.top - margin.bottom;
+ 
+  const chartArea = svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+ 
+  // Title
+  svg
+    .append("text")
+    .attr("class", "title")
+    .attr("text-anchor", "middle")
+    .attr("x", w / 2)
+    .attr("y", -100)
+    .attr("font-size", "30px")
+    .attr("font-weight", "bold")
+    .text("Obesity and Infant Mortality Visualization");
+ 
+  console.log("Rendering obesityDeathVis with standardized layout");
+ }
 
 function raceDeathVis() {
  // Determine which demographic to use as default based on current keyframe
@@ -383,6 +394,9 @@ function raceDeathVis() {
 
 
      const yAxis = chartArea.append("g").call(d3.axisLeft(y));
+
+      xAxis.selectAll("text").style("font-size", "20px");
+      yAxis.selectAll("text").style("font-size", "20px");
      //Axis
      chartArea
        .append("text")
@@ -410,7 +424,7 @@ function raceDeathVis() {
        .attr("class", "title")
        .attr("text-anchor", "middle")
        .attr("x", w / 2)
-       .attr("y", -70)
+       .attr("y", -100)
        .attr("font-size", "30px")
        .attr("font-weight", "bold")
        .text(`Infant Mortality Rates by County:  ${selectedDemographic} Population %`);
@@ -581,7 +595,7 @@ function raceDeathVis() {
        .attr("transform", `translate(${margin.left}, ${margin.top + 700})`);
 
 
-     // Add label text
+     // Add label 
      dropdownG
        .append("text")
        .attr("x", 0)
@@ -650,11 +664,6 @@ function raceDeathVis() {
      console.error("Error loading or processing data:", error);
    });
 }
-function obesityDeathVis() {
- initialiseSVG();
- console.log("Rendering obesityDeathVis");
-}
-
 
 // Update visualization based on the current keyframe
 function updateVisualization() {
