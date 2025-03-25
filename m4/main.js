@@ -3,6 +3,7 @@ let keyframes = [
  {
    activeVerse: 1,
    activeLines: [1, 2, 3, 4, 5],
+    svgUpdate: obesityDeathVis,
  },
  {
    activeVerse: 2,
@@ -317,11 +318,11 @@ function stateDeathVis() {
           min: 0, 
           max: lowIncomeThreshold, 
           color: "#d7191c"},
-        {name: "Middle Income >="+lowIncomeThreshold+" and <"+highIncomeThreshold,
+        {name: "Middle Income >= "+lowIncomeThreshold+" and < "+highIncomeThreshold,
           min: lowIncomeThreshold, 
           max: highIncomeThreshold, 
           color: "#fdae61"},
-        {name: "High Income >"+highIncomeThreshold, 
+        {name: "High Income > "+highIncomeThreshold, 
           min: highIncomeThreshold, 
           max: Infinity, 
           color: "#1a9641"}
@@ -390,19 +391,21 @@ function stateDeathVis() {
       // Add legend
       const legend = svg.append("g")
           .attr("class", "legend")
-          .attr("transform", "translate(" + (w - padding - 180) + "," + (padding + 20) + ")");
-      
+          .attr("transform", "translate(" + (w - padding - 1000) + "," + (padding + 20) + ")");
+      let squareSize = 20;
+      let ySpace = 25;
+      let squaretoTextSpace = 5;
       incomeBuckets.forEach((bucket, i) => {
         legend.append("rect")
             .attr("x", 0)
-            .attr("y", i * 25)
-            .attr("width", 20)
-            .attr("height", 20)
+            .attr("y", i * ySpace)
+            .attr("width", squareSize)
+            .attr("height", squareSize)
             .attr("fill", bucket.color);
         
         legend.append("text")
-            .attr("x", 30)
-            .attr("y", i * 25 + 15)
+            .attr("x", squareSize + squaretoTextSpace)
+            .attr("y", i * ySpace + squareSize/2 )
             .attr("font-size", "14px")
             .text(bucket.name);
       });
