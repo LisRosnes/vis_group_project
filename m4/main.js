@@ -309,6 +309,7 @@ function obesityDeathVis() {
 
     // Create obesity percentiles
     const numIntervals = 10; // Change this value to divide into different numbers of intervals (e.g., 5, 10, 20)
+    //I found any more than 10 creates a graph that is less consistent
     const rangeLabels = Array.from({ length: numIntervals }, (_, i) => {
       const start = (i * 100) / numIntervals;
       const end = ((i + 1) * 100) / numIntervals;
