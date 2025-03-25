@@ -35,6 +35,11 @@ let keyframes = [
    svgUpdate: raceDeathVis,
  },
  {
+  activeVerse: 5,
+  activeLines: [],
+  svgUpdate: guessTheRateVis,
+},
+ {
    activeVerse: 6,
    activeLines: [1, 2, 3, 4, 5],
  },
@@ -293,7 +298,129 @@ function stateDeathVis() {
       .text("Infant Mortality by US Counties' Median Income");
   });
  }
- 
+ function guessTheRateVis() {
+  // Clear the SVG
+  initialiseSVG();
+
+  // Set up dimensions
+  const margin = { top: 80, right: 80, bottom: 60, left: 80 };
+  const width = w - margin.left - margin.right;
+  const height = h - margin.top - margin.bottom;
+
+  // Create a group for the content
+  const container = svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+  // Add top text
+  container
+    .append("text")
+    .attr("class", "title")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", 0)
+    .attr("font-size", "30px")
+    .attr("font-weight", "bold")
+    .text("Guess the Rate [Static Visualization]");
+
+  // Add middle section with icon
+  const iconWidth = 100;
+  const iconHeight = 200;
+  const iconX = width / 2 - iconWidth / 2;
+  const iconY = height / 2 - iconHeight / 2 - 50;
+
+  // Create person icon
+  const personIcon = container
+    .append("g")
+    .attr("transform", `translate(${iconX}, ${iconY})`);
+
+  // Head
+  personIcon
+    .append("circle")
+    .attr("cx", 50)
+    .attr("cy", 40)
+    .attr("r", 30)
+    .attr("fill", "#3498db");
+
+  // Body
+  personIcon
+    .append("rect")
+    .attr("x", 35)
+    .attr("y", 70)
+    .attr("width", 30)
+    .attr("height", 40)
+    .attr("rx", 5)
+    .attr("fill", "#3498db");
+
+  // Arms
+  personIcon
+    .append("rect")
+    .attr("x", 10)
+    .attr("y", 80)
+    .attr("width", 25)
+    .attr("height", 15)
+    .attr("rx", 5)
+    .attr("fill", "#3498db");
+
+  personIcon
+    .append("rect")
+    .attr("x", 65)
+    .attr("y", 80)
+    .attr("width", 25)
+    .attr("height", 15)
+    .attr("rx", 5)
+    .attr("fill", "#3498db");
+
+  // Legs
+var legLength = 35;
+  personIcon
+    .append("rect")
+    .attr("x", 35)
+    .attr("y", 110)
+    .attr("width", 12)
+    .attr("height", legLength)
+    .attr("rx", 5)
+    .attr("fill", "#3498db");
+
+  personIcon
+    .append("rect")
+    .attr("x", 53)
+    .attr("y", 110)
+    .attr("width", 12)
+    .attr("height", legLength)
+    .attr("rx", 5)
+    .attr("fill", "#3498db");
+
+  // Add pointer text
+  container
+    .append("text")
+    .attr("class", "pointer-text")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", iconY + iconHeight + 20)
+    .attr("font-size", "24px")
+    .text("⬆️");
+
+  container
+    .append("text")
+    .attr("class", "pointer-text")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", iconY + iconHeight + 50)
+    .attr("font-size", "20px")
+    .text("Each icon represents 1 death out of 1,000 infants.");
+
+  // Add bottom text
+  container
+    .append("text")
+    .attr("class", "bottom-text")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", height - 30)
+    .attr("font-size", "20px")
+    .text("To progress, click the next button →");
+}
+
 function obesityDeathVis() {
   d3.csv(CSV_FILE_PATH).then(function (data) {
     // Process data
