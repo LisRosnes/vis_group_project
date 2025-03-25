@@ -315,14 +315,14 @@ function stateDeathVis() {
       const incomeBuckets = [
         {name: "Low Income <"+lowIncomeThreshold, 
           min: 0, 
-          max: lowIncomeThreshold-1, 
+          max: lowIncomeThreshold, 
           color: "#d7191c"},
-        {name: "Middle Income >="+lowIncomeThreshold+" and <="+highIncomeThreshold,
+        {name: "Middle Income >="+lowIncomeThreshold+" and <"+highIncomeThreshold,
           min: lowIncomeThreshold, 
           max: highIncomeThreshold, 
           color: "#fdae61"},
         {name: "High Income >"+highIncomeThreshold, 
-          min: highIncomeThreshold+1, 
+          min: highIncomeThreshold, 
           max: Infinity, 
           color: "#1a9641"}
       ];
@@ -330,6 +330,7 @@ function stateDeathVis() {
       // Assign income bucket to each data point
       data.forEach(d => {
         for (let bucket of incomeBuckets) {
+          //Check if the median income is less than the max value of the bucket and greater than or equal to the min value of the bucket
           if (d.median_income >= bucket.min && d.median_income < bucket.max) {
             d.incomeBucket = bucket.name;
             d.bucketColor = bucket.color;
