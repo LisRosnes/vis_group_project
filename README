@@ -1,0 +1,24 @@
+Is It Luck? - Interactive Data Visualization
+An interactive data visualization project that explores infant mortality rates across different demographics in the United States through an engaging scrollytelling experience.
+
+Project Overview: This project combines poetry with data visualization to tell a story about infant mortality disparities across socioeconomic and racial demographics. The visualization moves through several "keyframes" that highlight different aspects of these disparities as the user progresses through the poem.
+
+Prerequisites: A modern web browser (Chrome, Firefox, Safari, Edge)
+
+
+Project Structure
+docs/
+    ├── index.html
+    ├── style.css
+    ├── main.js
+    └── assets/
+        └── data/
+            └── merged_output.csv
+
+Data Requirements: The project requires a CSV file located at assets/data/merged_output.csv. This CSV should contain columns for: County, State, infant_mortality, median_income, obesity Demographic data (e.g., "Black including Hispanic", "White including Hispanic", etc.)            
+
+Running Locally Using Visual Studio Code Live Server:
+1. Install the "Live Server" extension in VS Code
+2. Open the project folder in VS Code
+3. Right-click on index.html
+4. Select "Open with Live Server"
