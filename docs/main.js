@@ -255,11 +255,11 @@ function stateDeathVis() {
       .append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(xScale));
-    xAxis.selectAll("text").style("font-size", "25px");
+    xAxis.selectAll("text").style("font-size", "20px");
  
     // Y-axis
     const yAxis = chartArea.append("g").call(d3.axisLeft(yScale));
-    yAxis.selectAll("text").style("font-size", "25px");
+    yAxis.selectAll("text").style("font-size", "20px");
  
     // X-axis label
     chartArea
@@ -493,7 +493,7 @@ function obesityDeathVis() {
       .attr("transform", `translate(0,${h - padding})`)
       .call(xAxis)
       .selectAll("text")
-      .style("font-size", "14px");
+      .style("font-size", "20px");
 
     const yAxis = d3.axisLeft(yScale);
     svg
@@ -501,25 +501,26 @@ function obesityDeathVis() {
       .attr("transform", `translate(${padding},0)`)
       .call(yAxis)
       .selectAll("text")
-      .style("font-size", "14px");
+      .style("font-size", "20px");
 
     // Add title and axis labels
     svg
       .append("text")
       .attr("class", "title")
       .attr("x", w / 2)
-      .attr("y", padding - 40)
+      .attr("y", -100)
       .style("text-anchor", "middle")
       .attr("font-size", "30px")
+      .attr("font-weight", "bold")
       .text("Infant Mortality by Relative Obesity Percentile");
 
     svg
       .append("text")
       .attr("class", "x-axis-label")
       .attr("x", w / 2)
-      .attr("y", h - 10 + 30)
+      .attr("y", h + 10)
       .attr("text-anchor", "middle")
-      .attr("font-size", "20px")
+      .attr("font-size", "25px")
       .text("Relative National Obesity Percentile");
 
     svg
@@ -529,7 +530,7 @@ function obesityDeathVis() {
       .attr("y", padding - 50)
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "middle")
-      .attr("font-size", "20px")
+      .attr("font-size", "25px")
       .text("Average Infant Mortality Rate (per 1,000 live births)");
   });
 }
@@ -617,8 +618,8 @@ function raceDeathVis() {
        .attr("class", "x-axis-label")
        .attr("text-anchor", "middle")
        .attr("x", width / 2)
-       .attr("y", height + 40)
-       .attr("font-size", "20px")
+       .attr("y", height + 60)
+       .attr("font-size", "25px")
        .text(`${selectedDemographic} (%)`);
      //Text
      chartArea
@@ -628,7 +629,7 @@ function raceDeathVis() {
        .attr("transform", "rotate(-90)")
        .attr("y", -50)
        .attr("x", -height / 2)
-       .attr("font-size", "20px")
+       .attr("font-size", "25px")
        .text("Infant Mortality Rate (per 1,000 live births)");
 
 
