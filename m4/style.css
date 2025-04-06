@@ -116,6 +116,7 @@ footer {
   transition: background 0.3s ease;
 }
 
+
 /* Position the left arrow on the left side */
 #backward-button {
   left: 1rem;
@@ -139,3 +140,7 @@ footer {
   border-radius: 8px; 
 }
 
+.tooltip {
+  font-size: 1rem;
+  color: #333;
+}

@@ -52,6 +52,17 @@ const h = 700;
 const padding = 80;
 
 
+let tooltip = d3.select("body")
+  .append("div")
+  .attr("class", "tooltip")
+  .style("position", "absolute")
+  .style("background", "rgba(255, 255, 255, 0.9)")
+  .style("padding", "10px")
+  .style("border", "1px solid #ddd")
+  .style("border-radius", "4px")
+  .style("pointer-events", "none")
+  .style("opacity", 0);
+
 let svg = d3.select("#svg");
 let keyframeIndex = 0;
 
@@ -113,7 +124,7 @@ async function loadData() {
  }
 
 
-function stateDeathVis() {
+ function stateDeathVis(sortOption = "mortality") {
   d3.csv(CSV_FILE_PATH).then(function (data) {
     data.forEach((d) => {
       d.infant_mortality = +d.infant_mortality;
@@ -127,10 +138,82 @@ function stateDeathVis() {
       ),
       ([state, avg_infant_mortality]) => ({ state, avg_infant_mortality })
     );
- 
+    
+    // Dictionary mapping states to their political party
+    const statePoliticalParty = {
+      "Alabama": "Republican",
+      "Alaska": "Republican",
+      "Arizona": "Democrat",
+      "Arkansas": "Republican",
+      "California": "Democrat",
+      "Colorado": "Democrat",
+      "Connecticut": "Democrat",
+      "Delaware": "Democrat",
+      "Florida": "Republican",
+      "Georgia": "Republican",
+      "Hawaii": "Democrat",
+      "Idaho": "Republican",
+      "Illinois": "Democrat",
+      "Indiana": "Republican",
+      "Iowa": "Republican",
+      "Kansas": "Republican",
+      "Kentucky": "Republican",
+      "Louisiana": "Republican",
+      "Maine": "Democrat",
+      "Maryland": "Democrat",
+      "Massachusetts": "Democrat",
+      "Michigan": "Democrat",
+      "Minnesota": "Democrat",
+      "Mississippi": "Republican",
+      "Missouri": "Republican",
+      "Montana": "Republican",
+      "Nebraska": "Republican",
+      "Nevada": "Democrat",
+      "New Hampshire": "Democrat",
+      "New Jersey": "Democrat",
+      "New Mexico": "Democrat",
+      "New York": "Democrat",
+      "North Carolina": "Republican",
+      "North Dakota": "Republican",
+      "Ohio": "Republican",
+      "Oklahoma": "Republican",
+      "Oregon": "Democrat",
+      "Pennsylvania": "Democrat",
+      "Rhode Island": "Democrat",
+      "South Carolina": "Republican",
+      "South Dakota": "Republican",
+      "Tennessee": "Republican",
+      "Texas": "Republican",
+      "Utah": "Republican",
+      "Vermont": "Democrat",
+      "Virginia": "Democrat",
+      "Washington": "Democrat",
+      "West Virginia": "Republican",
+      "Wisconsin": "Democrat",
+      "Wyoming": "Republican"
+    };
+    
+    if (sortOption === "mortality") {
+      // Sort states from highest to lowest infant mortality rate
+      stateData.sort((a, b) => b.avg_infant_mortality - a.avg_infant_mortality);
+    } else if (sortOption === "party") {
+      // Define fixed order for parties: Republican (red) first, Democrat (blue) second.
+      const partyOrder = { "Republican": 0, "Democrat": 1 };
+      stateData.sort((a, b) => {
+         const partyA = statePoliticalParty[a.state] || "";
+         const partyB = statePoliticalParty[b.state] || "";
+         // If in the same party, sort descending by infant mortality rate.
+         if (partyA === partyB) {
+              return b.avg_infant_mortality - a.avg_infant_mortality;
+         }
+         // Otherwise, sort by our fixed party order.
+         return (partyOrder[partyA] ?? 2) - (partyOrder[partyB] ?? 2);
+      });
+    }
+    
     initialiseSVG();
  
-    const margin = { top: 80, right: 80, bottom: 60, left: 80 };
+    const margin = { top: 80, right: 20, bottom: 60, left: 80 };
     const width = w - margin.left - margin.right;
     const height = h - margin.top - margin.bottom;
  
@@ -149,7 +232,7 @@ function stateDeathVis() {
       .domain([0, d3.max(stateData, (d) => d.avg_infant_mortality)])
       .range([height, 0]);
  
-    // Bars
+    // Bars with fill color based on political party
     chartArea
       .selectAll(".bar")
       .data(stateData)
@@ -160,7 +243,45 @@ function stateDeathVis() {
       .attr("y", (d) => yScale(d.avg_infant_mortality))
       .attr("width", xScale.bandwidth())
       .attr("height", (d) => height - yScale(d.avg_infant_mortality))
-      .attr("fill", "steelblue");
+      .attr("fill", (d) => {
+        const party = statePoliticalParty[d.state];
+        if (party === "Republican") return "red";
+        else if (party === "Democrat") return "blue";
+        else return "gray";
+      })
+      .on("mouseover", function(event, d) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("filter", "url(#glow)")
+          .style("stroke", "#fff")
+          .style("stroke-width", "2px");
+   
+        tooltip.transition()
+          .duration(200)
+          .style("opacity", 0.9);
+          
+        tooltip.html(
+          `<strong>${d.state}</strong><br>
+          Avg Infant Mortality: ${d.avg_infant_mortality.toFixed(2)}`
+        )
+        .style("left", event.pageX + "px")
+        .style("top", event.pageY - 28 + "px");
+      })
+      .on("mousemove", function(event) {
+        tooltip.style("left", event.pageX + "px")
+              .style("top", event.pageY - 28 + "px");
+      })
+      .on("mouseout", function() {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .style("stroke", "none");
+          
+        tooltip.transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
  
     // X-axis
     const xAxis = chartArea
@@ -170,13 +291,13 @@ function stateDeathVis() {
       .selectAll("text")
       .attr("transform", "rotate(-45)")
       .attr("dx", "-0.8em")
-      .attr("dy", "0.15em")
+      .attr("dy", "0.4em")
       .style("text-anchor", "end")
-      .style("font-size", "20px");
+      .style("font-size", "25px");
  
     // Y-axis
     const yAxis = chartArea.append("g").call(d3.axisLeft(yScale));
-    yAxis.selectAll("text").style("font-size", "20px");
+    yAxis.selectAll("text").style("font-size", "25px");
  
     // X-axis label
     chartArea
@@ -184,8 +305,8 @@ function stateDeathVis() {
       .attr("class", "x-axis-label")
       .attr("text-anchor", "middle")
       .attr("x", width / 2)
-      .attr("y", height + 150)
-      .attr("font-size", "25px")
+      .attr("y", height + 200)
+      .attr("font-size", "40px")
       .text("State");
  
     // Y-axis label
@@ -194,9 +315,9 @@ function stateDeathVis() {
       .attr("class", "y-axis-label")
       .attr("text-anchor", "middle")
       .attr("transform", "rotate(-90)")
-      .attr("y", -50)
-      .attr("x", -height / 2)
-      .attr("font-size", "25px")
+      .attr("y", -45)
+      .attr("x", -height / 2 + 50)
+      .attr("font-size", "40px")
       .text("Infant Mortality Rate (per 1,000 live births)");
  
     // Title
@@ -206,11 +327,83 @@ function stateDeathVis() {
       .attr("text-anchor", "middle")
       .attr("x", w / 2)
       .attr("y", -100)
-      .attr("font-size", "30px")
+      .attr("font-size", "50px")
       .attr("font-weight", "bold")
       .text("Average Infant Mortality by US State");
+ 
+    // Add legend for party colors
+    const legendData = [
+      { party: "Republican", color: "red" },
+      { party: "Democrat", color: "blue" }, 
+      { party: "NA", color: "gray" } 
+    ];
+    const legend = svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${w - margin.right -200}, ${margin.top})`);
+ 
+    legend.selectAll("rect")
+      .data(legendData)
+      .enter()
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", (d, i) => i * 30)
+      .attr("width", 20)
+      .attr("height", 20)
+      .attr("fill", d => d.color);
+ 
+    legend.selectAll("text")
+      .data(legendData)
+      .enter()
+      .append("text")
+      .attr("x", 30)
+      .attr("y", (d, i) => i * 30 + 15)
+      .text(d => d.party)
+      .style("font-size", "25px");
+ 
+    // If sorting by party, this calculates the average for each
+    if (sortOption === "party") {
+      // Calculate average infant mortality per party
+      const partyAvg = Array.from(
+        d3.rollup(
+          stateData,
+          v => d3.mean(v, d => d.avg_infant_mortality),
+          d => statePoliticalParty[d.state]
+        ),
+        ([party, avg]) => ({ party, avg })
+      );
+      
+      partyAvg.forEach(({ party, avg }) => {
+        // Get all states of this party
+        const statesOfParty = stateData.filter(d => statePoliticalParty[d.state] === party);
+        const xValues = statesOfParty.map(d => xScale(d.state));
+        const minX = d3.min(xValues);
+        const maxX = d3.max(xValues) + xScale.bandwidth();
+        
+        // horizontal dashed line representing average
+        chartArea.append("line")
+          .attr("x1", minX)
+          .attr("x2", maxX)
+          .attr("y1", yScale(avg))
+          .attr("y2", yScale(avg))
+          .attr("stroke", "black")
+          .attr("stroke-dasharray", "4")
+          .attr("stroke-width", 2);
+          
+        // text label for the average
+        chartArea.append("text")
+          .attr("x", (minX + maxX) / 2)
+          .attr("y", yScale(avg) - 5)
+          .attr("text-anchor", "middle")
+          .style("font-size", "30px")
+          .text(`Avg: ${avg.toFixed(2)}`);
+      });
+    }
   });
- }
+}
+
+
+
+
  
  function incomeDeathVis() {
   d3.csv(CSV_FILE_PATH).then(function (data) {
@@ -929,6 +1122,18 @@ document.getElementById("forward-button").addEventListener("click", () => {
    updateVisualization();
  }
 });
+
+
+// Attach event listener to the dropdown
+document.getElementById("sort-select").addEventListener("change", function() {
+  // Clear the current SVG content before re-rendering
+  svg.selectAll("*").remove();
+  
+  // Get the selected sort option and re-render the chart
+  const selectedSortOption = this.value;
+  stateDeathVis(selectedSortOption);
+});
+
 
 
 document.getElementById("backward-button").addEventListener("click", () => {
