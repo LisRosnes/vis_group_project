@@ -885,41 +885,41 @@ function raceDeathVis() {
 
 // Update visualization based on the current keyframe
 function updateVisualization() {
- let keyframe = keyframes[keyframeIndex];
+  let keyframe = keyframes[keyframeIndex];
 
+  // Remove any existing active highlighting
+  document.querySelectorAll(".verse").forEach(verse => verse.classList.remove("active-verse"));
+  document.querySelectorAll(".line").forEach(line => line.classList.remove("active-line"));
 
- // Highlight the active verse and its active lines
- // Remove any existing active highlighting from all verses/lines first
- document
-   .querySelectorAll(".verse")
-   .forEach((verse) => verse.classList.remove("active-verse"));
- document
-   .querySelectorAll(".line")
-   .forEach((line) => line.classList.remove("active-line"));
+  // Mark the active verse and its active lines
+  let verseEl = document.getElementById("verse" + keyframe.activeVerse);
+  if (verseEl) {
+    verseEl.classList.add("active-verse");
+    keyframe.activeLines.forEach(num => {
+      let lineEl = verseEl.querySelector("#line" + num);
+      if (lineEl) lineEl.classList.add("active-line");
+    });
+  }
 
+  // Get layout elements
+  const wrapper = document.querySelector(".wrapper");
+  const rightColumn = document.querySelector(".right-column");
 
- // Mark the active verse (assuming each verse has an id like "verse1", "verse2", etc.)
- let verseEl = document.getElementById("verse" + keyframe.activeVerse);
- if (verseEl) {
-   verseEl.classList.add("active-verse");
-   // For each active line number, add a class to highlight it.
-   keyframe.activeLines.forEach((num) => {
-     // Here we assume the line id is "line" followed by the line number.
-     // If lines are unique across verses, you may need to adjust this.
-     let lineEl = verseEl.querySelector("#line" + num);
-     if (lineEl) lineEl.classList.add("active-line");
-   });
- }
-
-
- // Update the SVG if the current keyframe has an svgUpdate function
- if (keyframe.svgUpdate && typeof keyframe.svgUpdate === "function") {
-   keyframe.svgUpdate();
- } else {
-   // If no specific visualization function is provided, you might choose to clear or reset the SVG.
-   initialiseSVG();
- }
+  // Check if a visual update function is provided
+  if (keyframe.svgUpdate && typeof keyframe.svgUpdate === "function") {
+    // For verses with a visual: remove the centered layout and show the right column.
+    wrapper.classList.remove("center-only");
+    rightColumn.style.display = "block";  // Ensure the right column is visible
+    keyframe.svgUpdate(); // Call the visualization update
+  } else {
+    // For verses without a visual (first and last): add centered layout and hide the right column.
+    wrapper.classList.add("center-only");
+    rightColumn.style.display = "none";
+    // Optionally clear the SVG or reset it as needed:
+    initialiseSVG();
+  }
 }
+
 
 
 // Event listeners for arrow buttons to navigate keyframes
