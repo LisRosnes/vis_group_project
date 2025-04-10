@@ -498,185 +498,292 @@ async function loadData() {
   const gameWidth = w;
   const gameHeight = h;
 
-  // Define the game steps
-  const steps = [
+  const fallbackSteps = [
     {
-      topText: "Welcome to Guess the Rate!",
-      bottomText: "Select the icons representing the rate, then click ► to submit.",
-      numIcons: 8,
-      isGuess: false, // introductory step (could be extended)
+      topText: "Welcome to 'Guess the Rate'",
+      bottomText: "Each icon represents 1 baby death per 1,000 births. Click to guess rates in different regions.",
+      numIcons: 10,
+      isGuess: false,
     },
     {
-      topText: "Guess the average death rate.",
-      bottomText: "Click the icons to choose your guess.",
-      numIcons: 8,
+      topText: "What is the average infant mortality rate across the U.S.?",
+      bottomText: "Click how many infants (out of 1,000 births) you think don’t survive, on average.",
+      numIcons: 10,
       isGuess: true,
-      correctAnswer: 4,
+      correctAnswer: 6,  // placeholder
     },
     {
-      topText: "Guess the death rate given highest median income ($10,000).",
-      bottomText: "Make your selection.",
-      numIcons: 8,
+      topText: "Now guess the rate in counties with higher median incomes.",
+      bottomText: "These are the top 20% of counties by income. What do you think the average is?",
+      numIcons: 10,
       isGuess: true,
-      correctAnswer: 1,
+      correctAnswer: 4, // placeholder
     },
     {
-      topText: "Guess the death rate given lowest median income ($2,000).",
-      bottomText: "Make your selection.",
-      numIcons: 8,
+      topText: "Now guess the rate in counties with lower median incomes.",
+      bottomText: "These are the bottom 20% of counties by income. What do you think the average is?",
+      numIcons: 10,
       isGuess: true,
-      correctAnswer: 8,
+      correctAnswer: 9, // placeholder
+    },
+    {
+      topText: "Thanks for exploring these disparities",
+      bottomText: "Click ► to continue with the poem.",
+      numIcons: 0,
+      isGuess: false,
     }
   ];
+  
 
-  let currentStep = 0;
+  function startGame(steps) {
+    let currentStep = 0;
+    let userGuess = 0;
 
-  // Create a group for game content inside the SVG
-  const gameGroup = svg.append("g").attr("class", "game-group");
+    const gameGroup = svg.append("g").attr("class", "game-group");
 
-  // Add top and bottom text elements
-  const topText = gameGroup.append("text")
-    .attr("class", "game-top-text")
-    .attr("x", gameWidth / 2)
-    .attr("y", 50)
-    .attr("text-anchor", "middle")
-    .text("");
+    gameGroup.append("rect")
+      .attr("width", gameWidth)
+      .attr("height", gameHeight)
+      .attr("fill", "#f5f5f5")
+      .attr("rx", 10)
+      .attr("ry", 10);
 
-  const bottomText = gameGroup.append("text")
-    .attr("class", "game-bottom-text")
-    .attr("x", gameWidth / 2)
-    .attr("y", gameHeight - 40)
-    .attr("text-anchor", "middle")
-    .text("");
+    const topText = gameGroup.append("text")
+      .attr("class", "game-top-text")
+      .attr("x", gameWidth / 2)
+      .attr("y", 80)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "28px")
+      .attr("font-weight", "bold")
+      .attr("fill", "#333")
+      .text("");
 
-  // Function to draw a game step
-  function drawStep(stepIndex) {
-    const step = steps[stepIndex];
-    topText.text(step.topText);
-    bottomText.text(step.bottomText);
+    const bottomText = gameGroup.append("text")
+      .attr("class", "game-bottom-text")
+      .attr("x", gameWidth / 2)
+      .attr("y", gameHeight - 80)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "22px")
+      .attr("fill", "#333")
+      .text("");
 
-    // Remove any previous icons group
-    gameGroup.selectAll(".icons-group").remove();
+    const nextButton = gameGroup.append("g")
+      .attr("class", "next-button")
+      .attr("transform", `translate(${gameWidth/2}, ${gameHeight - 40})`)
+      .style("cursor", "pointer");
 
-    // Create a new group for the icons
-    const iconsGroup = gameGroup.append("g")
-      .attr("class", "icons-group");
+    nextButton.append("rect")
+      .attr("x", -60)
+      .attr("y", -25)
+      .attr("width", 120)
+      .attr("height", 40)
+      .attr("rx", 20)
+      .attr("ry", 20)
+      .attr("fill", "#3498db");
 
-    const iconSize = 80;
-    const iconPadding = 20;
-    const numIcons = step.numIcons;
+    nextButton.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", 5)
+      .attr("fill", "white")
+      .attr("font-size", "18px")
+      .text("Next");
 
-    // Calculate a starting x position for centering the icons
-    const startX = (gameWidth - (numIcons * (iconSize + iconPadding) - iconPadding)) / 2;
-    const icons = iconsGroup.selectAll(".icon")
-      .data(d3.range(numIcons))
-      .enter()
-      .append("g")
-      .attr("class", "icon")
-      .attr("transform", (d, i) => `translate(${startX + i * (iconSize + iconPadding)}, ${150})`)
-      .style("cursor", step.isGuess ? "pointer" : "default");
+    const infoText = gameGroup.append("text")
+      .attr("class", "info-text")
+      .attr("x", gameWidth / 2)
+      .attr("y", gameHeight - 120)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "20px")
+      .attr("fill", "#555")
+      .attr("opacity", 0)
+      .text("");
 
-    // Draw a cleaner icon with a circle (head) and rectangle (body)
-    icons.each(function(d, i) {
-      const icon = d3.select(this);
-      // Head: circle
-      icon.append("circle")
-        .attr("cx", iconSize / 2)
-        .attr("cy", iconSize / 3)
-        .attr("r", 15)
-        .attr("fill", "#3498db")
-        .attr("class", "icon-head");
+    function drawStep(stepIndex) {
+      const step = steps[stepIndex];
+      topText.text(step.topText);
+      bottomText.text(step.bottomText);
+      infoText.attr("opacity", 0);
+      userGuess = 0;
 
-      // Body: rectangle
-      icon.append("rect")
-        .attr("x", iconSize / 2 - 10)
-        .attr("y", iconSize / 3 + 20)
-        .attr("width", 20)
-        .attr("height", 30)
-        .attr("fill", "#3498db")
-        .attr("class", "icon-body");
-    });
+      gameGroup.selectAll(".icons-group").remove();
+      nextButton.select("text").text(stepIndex === steps.length - 1 ? "Continue" : "Next");
+      nextButton.style("display", stepIndex === steps.length - 1 ? "none" : "block");
 
-    // If this is a guessing step, enable interactions
-    if (step.isGuess) {
-      setupGuessInteraction(icons, step.correctAnswer);
-    }
-  }
+      if (step.numIcons === 0) return;
 
-  // Function to set up interaction for guess steps
-  function setupGuessInteraction(icons, correctAnswer) {
-    icons.on("click", function(event, d) {
-      // d is the index of the clicked icon.
-      // Update selection: icons to the left (and including clicked) change fill color.
-      icons.each(function(_, i) {
+      const iconsGroup = gameGroup.append("g").attr("class", "icons-group");
+      const iconSize = 60;
+      const iconPadding = 20;
+      const startX = (gameWidth - (step.numIcons * (iconSize + iconPadding) - iconPadding)) / 2;
+      const iconY = gameHeight / 2 - 50;
+
+      const icons = iconsGroup.selectAll(".icon")
+        .data(d3.range(step.numIcons))
+        .enter()
+        .append("g")
+        .attr("class", d => `icon icon-${d}`)
+        .attr("transform", (d, i) => `translate(${startX + i * (iconSize + iconPadding)}, ${iconY})`)
+        .style("cursor", step.isGuess ? "pointer" : "default")
+        .style("opacity", 1);
+
+      icons.each(function(d, i) {
         const icon = d3.select(this);
-        if (i <= d) {
-          icon.selectAll("circle, rect")
-            .transition()
-            .duration(300)
-            .attr("fill", "#95a5a6"); // grey tint for selected icons
-          icon.classed("selected", true);
-        } else {
-          icon.selectAll("circle, rect")
-            .transition()
-            .duration(300)
-            .attr("fill", "#3498db");
-          icon.classed("selected", false);
-        }
+        icon.append("circle")
+          .attr("cx", iconSize / 2)
+          .attr("cy", iconSize / 3)
+          .attr("r", 12)
+          .attr("fill", "#3498db");
+
+        icon.append("rect")
+          .attr("x", iconSize / 2 - 8)
+          .attr("y", iconSize / 3 + 15)
+          .attr("width", 16)
+          .attr("height", 25)
+          .attr("rx", 5)
+          .attr("ry", 5)
+          .attr("fill", "#3498db");
+
+        icon.append("text")
+          .attr("x", iconSize / 2)
+          .attr("y", iconSize / 3 + 60)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "16px")
+          .attr("fill", "#555")
+          .text(i + 1);
       });
-      bottomText.text("Click ► to check your answer");
 
-      // Set the forward button to check the answer when clicked
-      d3.select("#forward-button").on("click", function() {
-        const userGuess = d3.selectAll(".icon.selected").size();
+      if (step.isGuess) {
+        setupGuessInteraction(icons, step.correctAnswer, step.actualRate);
+      }
+    }
 
-        if (userGuess === correctAnswer) {
-          bottomText.text("✅ Correct!");
-        } else {
-          const hint = userGuess > correctAnswer ? "Too high." : "Too low.";
-          bottomText.text(`❌ ${hint} Correct answer is ${correctAnswer}.`);
-        }
+    function setupGuessInteraction(icons, correctAnswer, actualRate) {
+      nextButton.on("click", null);
 
-        // Highlight the correct icons with a green tint
-        icons.each(function(_, i) {
+      icons.on("click", function(event, d) {
+        userGuess = d + 1;
+        icons.each(function(iconIndex) {
           const icon = d3.select(this);
-          if (i < correctAnswer) {
-            icon.selectAll("circle, rect")
-              .transition()
-              .duration(300)
-              .attr("fill", "#2ecc71"); // green for correct
-          } else {
-            icon.selectAll("circle, rect")
-              .transition()
-              .duration(300)
-              .attr("fill", "#3498db");
-          }
+          icon.selectAll("circle, rect")
+            .transition()
+            .duration(200)
+            .attr("fill", iconIndex < userGuess ? "#e74c3c" : "#3498db");
         });
 
-        // Reset the forward button to go to the next step
-        d3.select("#forward-button").on("click", nextStep);
+        bottomText.text(`You selected ${userGuess} out of 10. Click Next to continue.`);
+        nextButton.on("click", () => checkAnswer(userGuess, correctAnswer, actualRate));
       });
-    });
-  }
 
-  // Function to advance to the next game step
-  function nextStep() {
-    currentStep++;
-    if (currentStep < steps.length) {
-      drawStep(currentStep);
-    } else {
-      topText.text("Thanks for playing the interactive experience!");
-      bottomText.text("");
-      gameGroup.selectAll(".icons-group").remove();
+      nextButton.on("click", function() {
+        if (userGuess === 0) {
+          bottomText.text("Please make a selection by clicking on the icons.");
+        } else {
+          checkAnswer(userGuess, correctAnswer, actualRate);
+        }
+      });
     }
+
+    function checkAnswer(guess, correct, actualRate) {
+      const step = steps[currentStep];
+      const difference = Math.abs(guess - correct);
+    
+      let feedbackText = guess === correct
+        ? "✓ Correct! That's exactly right."
+        : difference <= 1
+        ? "Almost! Very close to the correct answer."
+        : guess > correct
+        ? "Your guess was too high."
+        : "Your guess was too low.";
+    
+      let rateDetail = actualRate
+        ? ` (${actualRate.toFixed(1)} deaths per 1,000 births)`
+        : "";
+    
+      let note = (currentStep === 2 || currentStep === 3)
+        ? " Note: This is an average — individual counties in this group may vary widely (especially in lower income)."
+        : "";
+    
+      infoText.text(`${feedbackText} The correct answer is ${correct}${rateDetail}.${note}`)
+        .transition()
+        .duration(500)
+        .attr("opacity", 1);
+    
+      gameGroup.selectAll(".icon").each(function(d) {
+        const icon = d3.select(this);
+        icon.selectAll("circle, rect")
+          .transition()
+          .duration(500)
+          .attr("fill", d < correct ? "#2ecc71" : "#bdc3c7");
+      });
+    
+      nextButton.on("click", nextStep);
+      bottomText.text("Click Next to continue");
+    }
+    
+
+    function nextStep() {
+      currentStep++;
+      if (currentStep < steps.length) {
+        drawStep(currentStep);
+      } else {
+        svg.selectAll("*").remove();
+        keyframeIndex++;
+        updateVisualization();
+      }
+    }
+
+    nextButton.on("click", function() {
+      if (steps[currentStep].isGuess && userGuess === 0) {
+        bottomText.text("Please make a selection by clicking on the icons.");
+      } else {
+        nextStep();
+      }
+    });
+
+    drawStep(currentStep);
   }
 
-  // Attach the initial next-step behavior to the forward button
-  d3.select("#forward-button").on("click", nextStep);
+  // Load and process real data
+  d3.csv(CSV_FILE_PATH).then(function(data) {
+    data.forEach(d => {
+      d.infant_mortality = +d.infant_mortality;
+      d.median_income = +d.median_income;
+    });
 
-  // Draw the first step
-  drawStep(currentStep);
+// Sort counties by income and extract top/bottom 20%
+// This helps us define "high income" vs "low income" areas
+const sortedByIncome = data.sort((a, b) => a.median_income - b.median_income);
+const cutoff = Math.floor(sortedByIncome.length * 0.2);
+
+const bottom20 = sortedByIncome.slice(0, cutoff);           // Lowest 20% income counties
+const top20 = sortedByIncome.slice(-cutoff);                // Highest 20% income counties
+
+
+    const avgBottom20MortalityRaw = d3.mean(bottom20, d => d.infant_mortality);
+    const avgTop20MortalityRaw = d3.mean(top20, d => d.infant_mortality);
+    const medianMortalityRaw = d3.median(data, d => d.infant_mortality);
+
+    const avgBottom20Mortality = Math.floor(avgBottom20MortalityRaw);
+    const avgTop20Mortality = Math.floor(avgTop20MortalityRaw);
+    const medianMortality = Math.floor(medianMortalityRaw);
+
+    const dataSteps = [...fallbackSteps];
+    dataSteps[1].correctAnswer = medianMortality;
+    dataSteps[1].actualRate = medianMortalityRaw;
+
+    dataSteps[2].correctAnswer = avgTop20Mortality;
+    dataSteps[2].actualRate = avgTop20MortalityRaw;
+
+    dataSteps[3].correctAnswer = avgBottom20Mortality;
+    dataSteps[3].actualRate = avgBottom20MortalityRaw;
+
+    startGame(dataSteps);
+  }).catch(error => {
+    console.error("Data load failed, using fallback:", error);
+    startGame(fallbackSteps);
+  });
 }
+
 
 function obesityDeathVis() {
   d3.csv(CSV_FILE_PATH).then(function (data) {

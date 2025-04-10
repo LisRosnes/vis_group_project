@@ -144,3 +144,20 @@ footer {
   font-size: 1rem;
   color: #333;
 }
+
+/* Interactive experience button (verse 5) */
+.interactive-button {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 30px;
+  background-color: #f04e4e;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.interactive-button:hover {
+  background-color: #d93b3b;
+}
