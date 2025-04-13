@@ -144,3 +144,53 @@ footer {
   font-size: 1rem;
   color: #333;
 }
+
+
+/* Container for the slider placed in .right-column */
+#income-slider-container {
+  width: 100%;             /* Use full width of the right column */
+  margin-top: 20px;        /* Creates space between the graph and the slider */
+  text-align: center;      /* Center the slider within the container */
+  padding: 10px;
+  background: #fff;        /* Optional: a background color for contrast */
+  border: 1px solid #ccc;  /* Optional: a border to visually define the container */
+}
+
+/* Make the slider larger */
+#income-slider-container input[type="range"] {
+  -webkit-appearance: none; /* Remove default styling */
+  appearance: none;
+  width: 90%;               /* Use 90% of the container's width */
+  height: 12px;             /* Increase the height of the slider track */
+  background: #ddd;
+  outline: none;
+  border-radius: 5px;
+  margin: 10px auto;        /* Center the slider */
+}
+
+/* Style for the slider thumb on WebKit browsers */
+#income-slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;             /* Increase thumb size */
+  height: 24px;
+  border-radius: 50%;      /* Make thumb circular */
+  background: #555;
+  cursor: pointer;
+}
+
+/* Style for the slider thumb on Firefox */
+#income-slider-container input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #555;
+  cursor: pointer;
+}
+
+/* Optionally, style the slider label if needed */
+#income-slider-container label {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 10px;
+}
