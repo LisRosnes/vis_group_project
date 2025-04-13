@@ -1180,21 +1180,22 @@ function updateVisualization() {
     stateSortContainer.style.display = "none";  // Hide for other visualizations
   }
 
-  // Get layout elements
+  if (keyframe.svgUpdate !== incomeDeathVis) {
+    d3.select("#income-slider-container").remove();
+  }
+
   const wrapper = document.querySelector(".wrapper");
   const rightColumn = document.querySelector(".right-column");
 
   // Check if a visual update function is provided
   if (keyframe.svgUpdate && typeof keyframe.svgUpdate === "function") {
-    // For verses with a visual: remove the centered layout and show the right column.
+    // For verses with a visual: remove the centered layout and show the right column
     wrapper.classList.remove("center-only");
-    rightColumn.style.display = "block";  // Ensure the right column is visible
-    keyframe.svgUpdate(); // Call the visualization update
+    rightColumn.style.display = "block";  
+    keyframe.svgUpdate(); 
   } else {
-    // For verses without a visual (first and last): add centered layout and hide the right column.
     wrapper.classList.add("center-only");
     rightColumn.style.display = "none";
-    // Optionally clear the SVG or reset it as needed:
     initialiseSVG();
   }
 }
