@@ -145,6 +145,53 @@ footer {
   color: #333;
 }
 
+#sort-select {
+  font-size: 1.8rem;   /* Increase text size */
+  padding: 0.5rem;     /* Add more padding around the text */
+  width: 25%;         /* Make it expand to the full width of its container */
+  border-radius: 4px;  /* Optional: smooth out the corners */
+}
+
+
+
+/* Container for the slider placed in .right-column */
+#income-slider-container {
+  width: 100%;            
+  margin-top: 20px;        
+  text-align: center;
+  padding: 10px;
+  background: #fff;  
+  border: 1px solid #ccc;
+}
+
+/* Make the slider larger */
+#income-slider-container input[type="range"] {
+  -webkit-appearance: none; 
+  appearance: none;
+  width: 90%;         
+  height: 12px;          
+  background: #ddd;
+  outline: none;
+  border-radius: 5px;
+  margin: 10px auto;
+}
+
+/* Style for the slider thumb on WebKit browsers */
+#income-slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;           
+  height: 24px;
+  border-radius: 50%;     
+  background: #555;
+  cursor: pointer;
+}
+
+#income-slider-container label {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 10px;
+=======
 /* Interactive experience button (verse 5) */
 .interactive-button {
   margin-top: 1rem;
@@ -160,4 +207,4 @@ footer {
 
 .interactive-button:hover {
   background-color: #d93b3b;
-}
+ }

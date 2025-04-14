@@ -47,9 +47,9 @@ let keyframes = [
 
 
 // Set width, height, and padding for the plot
-const w = 1600;
+const w = 2000;
 const h = 700;
-const padding = 80;
+const padding = 30;
 
 
 let tooltip = d3.select("body")
@@ -326,7 +326,7 @@ async function loadData() {
       .attr("class", "title")
       .attr("text-anchor", "middle")
       .attr("x", w / 2)
-      .attr("y", -100)
+      .attr("y", -50)
       .attr("font-size", "50px")
       .attr("font-weight", "bold")
       .text("Average Infant Mortality by US State");
@@ -379,7 +379,7 @@ async function loadData() {
         const minX = d3.min(xValues);
         const maxX = d3.max(xValues) + xScale.bandwidth();
         
-        // horizontal dashed line representing average
+        // horizontal dashed line representing average of each party
         chartArea.append("line")
           .attr("x1", minX)
           .attr("x2", maxX)
@@ -389,7 +389,7 @@ async function loadData() {
           .attr("stroke-dasharray", "4")
           .attr("stroke-width", 2);
           
-        // text label for the average
+        // text label for the average of each party
         chartArea.append("text")
           .attr("x", (minX + maxX) / 2)
           .attr("y", yScale(avg) - 5)
@@ -412,7 +412,7 @@ async function loadData() {
       d.median_income = +d.median_income;
       d.infant_mortality = +d.infant_mortality;
     });
- 
+    const incomeExtent = d3.extent(data, d => d.median_income);
     initialiseSVG();
  
     const margin = { top: 80, right: 80, bottom: 60, left: 80 };
@@ -423,10 +423,8 @@ async function loadData() {
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
  
-    // Define xScale based on median income
-    let xScale = d3
-      .scaleLinear()
-      .domain(d3.extent(data, (d) => d.median_income))
+    const xScale = d3.scaleLinear()
+      .domain([incomeExtent[0], incomeExtent[1]])
       .range([0, width]);
  
     // Define yScale based on infant mortality
@@ -434,18 +432,6 @@ async function loadData() {
       .scaleLinear()
       .domain([0, d3.max(data, (d) => d.infant_mortality)])
       .range([height, 0]);
- 
-    // Append circles for each data point to create scatter plot
-    chartArea
-      .selectAll("circle")
-      .data(data)
-      .enter()
-      .append("circle")
-      .attr("cx", (d) => xScale(d.median_income))
-      .attr("cy", (d) => yScale(d.infant_mortality))
-      .attr("r", 5)
-      .attr("fill", "steelblue")
-      .attr("fill-opacity", 0.3);
  
     // X-axis
     const xAxis = chartArea
@@ -485,12 +471,105 @@ async function loadData() {
       .attr("class", "title")
       .attr("text-anchor", "middle")
       .attr("x", w / 2)
-      .attr("y", -100)
+      .attr("y", -50)
       .attr("font-size", "30px")
       .attr("font-weight", "bold")
       .text("Infant Mortality by US Counties' Median Income");
+      
+    // Plot the scatter points for each county
+    chartArea.selectAll("circle")
+      .data(data, d => d.County)
+      .enter()
+      .append("circle")
+      .attr("cx", d => xScale(d.median_income))
+      .attr("cy", d => yScale(d.infant_mortality))
+      .attr("r", 5)
+      .attr("fill", "steelblue")
+      .attr("fill-opacity", 0.4);
+  
+    let sliderContainer = d3.select(".right-column").select("#income-slider-container");
+    if (sliderContainer.empty()) {
+      sliderContainer = d3.select(".right-column")
+        .append("div")
+        .attr("id", "income-slider-container");
+    }
+    
+  
+  // label for the slider
+  const sliderLabel = sliderContainer.append("label")
+    .attr("for", "incomeSlider")
+    .style("font-size", "28px")
+    .text(`Slide Right to Improve Your Fate: $${incomeExtent[0]} - $${incomeExtent[0] + 10000}`);
+
+  
+  // Slider element with step size 10,000
+  const incomeSlider = sliderContainer.append("input")
+    .attr("type", "range")
+    .attr("id", "incomeSlider")
+    .attr("min", incomeExtent[0])
+    .attr("max", incomeExtent[1] - 10000) 
+    .attr("value", incomeExtent[0])
+    .attr("step", 10000);
+  
+  // vertical bar that represents the min/max mortality for the selected income bucket
+  const barWidth = 125; 
+  let summaryBar = chartArea.append("rect")
+    .attr("class", "summary-bar")
+    .attr("fill", "orange")
+    .attr("opacity", 0.3);
+  
+  // label to display the min and max infant mortality values
+  let summaryLabel = chartArea.append("text")
+    .attr("class", "summary-label")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "22px");
+  
+  // Update the vertical bar when the slider is moved.
+  incomeSlider.on("input", function () {
+    const lowerBound = +this.value;
+    const upperBound = lowerBound + 10000;
+    
+    sliderLabel.text(`Slide Right to Improve Your Fate: $${lowerBound} - $${upperBound}`)
+      .style("font-size", "28px");  
+    // Filter the data for counties within this income bracket and with infant mortality > 0
+    const filteredData = data.filter(d => 
+      d.median_income >= lowerBound &&
+      d.median_income < upperBound &&
+      d.infant_mortality > 0
+    );
+    
+    if (filteredData.length > 0) {
+      // Compute the min and max infant mortality
+      const minMortality = d3.min(filteredData, d => d.infant_mortality);
+      const maxMortality = d3.max(filteredData, d => d.infant_mortality);
+      
+      // vertical bar positioned at the midpoint of the income bucket
+      const midIncome = lowerBound + 5000;
+      
+      summaryBar.transition().duration(500)
+        .attr("x", xScale(midIncome) - barWidth / 2)
+        .attr("width", barWidth)
+        .attr("y", yScale(maxMortality))
+        .attr("height", yScale(minMortality) - yScale(maxMortality));
+      
+      summaryLabel.transition().duration(500)
+        .attr("x", xScale(midIncome))
+        .attr("y", yScale(maxMortality) - 10)
+        .text(`Min: ${minMortality.toFixed(2)} | Max: ${maxMortality.toFixed(2)}`);
+    } else {
+      // If no data exists for the selected range then hide summary bar
+      summaryBar.transition().duration(500)
+        .attr("height", 0);
+      summaryLabel.transition().duration(500)
+        .text("No data");
+    }
+  });
+
+      
   });
  }
+
+
  function guessTheRateVis() {
   // Clear the SVG container
   svg.selectAll("*").remove();
@@ -1006,7 +1085,7 @@ function raceDeathVis() {
        .attr("class", "title")
        .attr("text-anchor", "middle")
        .attr("x", w / 2)
-       .attr("y", -100)
+       .attr("y", -50)
        .attr("font-size", "30px")
        .attr("font-weight", "bold")
        .text(`Infant Mortality Rates by County:  ${selectedDemographic} Population %`);
@@ -1174,7 +1253,7 @@ function raceDeathVis() {
      const dropdownG = svg
        .append("g")
        .attr("class", "dropdown-container")
-       .attr("transform", `translate(${margin.left}, ${margin.top + 700})`);
+       .attr("transform", `translate(${margin.left}, ${h + 10})`);
 
 
      // Add label 
@@ -1265,21 +1344,29 @@ function updateVisualization() {
     });
   }
 
-  // Get layout elements
+  const stateSortContainer = document.getElementById("state-sort-container");
+  if (keyframe.svgUpdate === stateDeathVis) {
+    stateSortContainer.style.display = "block"; // Show for stateDeathVis
+  } else {
+    stateSortContainer.style.display = "none";  // Hide for other visualizations
+  }
+
+  if (keyframe.svgUpdate !== incomeDeathVis) {
+    d3.select("#income-slider-container").remove();
+  }
+
   const wrapper = document.querySelector(".wrapper");
   const rightColumn = document.querySelector(".right-column");
 
   // Check if a visual update function is provided
   if (keyframe.svgUpdate && typeof keyframe.svgUpdate === "function") {
-    // For verses with a visual: remove the centered layout and show the right column.
+    // For verses with a visual: remove the centered layout and show the right column
     wrapper.classList.remove("center-only");
-    rightColumn.style.display = "block";  // Ensure the right column is visible
-    keyframe.svgUpdate(); // Call the visualization update
+    rightColumn.style.display = "block";  
+    keyframe.svgUpdate(); 
   } else {
-    // For verses without a visual (first and last): add centered layout and hide the right column.
     wrapper.classList.add("center-only");
     rightColumn.style.display = "none";
-    // Optionally clear the SVG or reset it as needed:
     initialiseSVG();
   }
 }
@@ -1297,10 +1384,8 @@ document.getElementById("forward-button").addEventListener("click", () => {
 
 // Attach event listener to the dropdown
 document.getElementById("sort-select").addEventListener("change", function() {
-  // Clear the current SVG content before re-rendering
   svg.selectAll("*").remove();
-  
-  // Get the selected sort option and re-render the chart
+
   const selectedSortOption = this.value;
   stateDeathVis(selectedSortOption);
 });
