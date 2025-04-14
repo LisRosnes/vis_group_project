@@ -982,350 +982,342 @@ function obesityDeathVis() {
 }
 
 function raceDeathVis() {
- // Determine which demographic to use as default based on current keyframe
- let defaultDemographic;
+  // Determine which demographic to use as default based on current keyframe
+  let defaultDemographic;
   // Check which keyframe is currently active
- if (keyframes[keyframeIndex].activeVerse === 2 && keyframes[keyframeIndex].activeLines.includes(5)) {
-   defaultDemographic = "Black including Hispanic";
- } else if (keyframes[keyframeIndex].activeVerse === 3 && keyframes[keyframeIndex].activeLines.includes(4) && keyframes[keyframeIndex].activeLines.includes(5)) {
-   defaultDemographic = "All Non-White Races including Hispanic";
- } else {
-   defaultDemographic = "White including Hispanic";
- }
+  if (keyframes[keyframeIndex].activeVerse === 2 && keyframes[keyframeIndex].activeLines.includes(5)) {
+    defaultDemographic = "Black including Hispanic";
+  } else if (keyframes[keyframeIndex].activeVerse === 3 && keyframes[keyframeIndex].activeLines.includes(4) && keyframes[keyframeIndex].activeLines.includes(5)) {
+    defaultDemographic = "All Non-White Races including Hispanic";
+  } else {
+    defaultDemographic = "White including Hispanic";
+  }
 
+  // Define the US regions and the states in each region
+  const regions = {
+    "Northeast": ["Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont", "New York", "New Jersey", "Pennsylvania"],
+    "Midwest": ["Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin", "Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota"],
+    "South": ["Delaware", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas"],
+    "West": ["Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming", "Alaska", "California", "Hawaii", "Oregon", "Washington"]
+  };
 
- d3.csv(CSV_FILE_PATH)
-   .then(function (data) {
-     // Parse numeric values
-     data.forEach((d) => {
-       d.infant_mortality = +d.infant_mortality;
-       d["Black including Hispanic"] = +d["Black including Hispanic"];
-       d["White including Hispanic"] = +d["White including Hispanic"];
-       d["Hispanic All Races"] = +d["Hispanic All Races"];
-       d["All Non-White Races including Hispanic"] =
-         +d["All Non-White Races including Hispanic"];
-       d["Asian/Pacific Islander including Hispanic"] =
-         +d["Asian/Pacific Islander including Hispanic"];
-       d["American Indian/Alaskan Native including Hispanic"] =
-         +d["American Indian/Alaskan Native including Hispanic"];
-       d.median_income = +d.median_income;
-       d.obesity = +d.obesity;
-     });
+  // Create a map of state to region for quick lookup
+  const stateToRegion = {};
+  Object.entries(regions).forEach(([region, states]) => {
+    states.forEach(state => {
+      stateToRegion[state] = region;
+    });
+  });
 
+  // Define colors for each region - choosing distinct colors that work well together
+  const regionColors = {
+    "Northeast": "#1f77b4", // blue
+    "Midwest": "#2ca02c",   // green
+    "South": "#d62728",     // red
+    "West": "#9467bd",      // purple
+    "Unknown": "#7f7f7f"    // gray for any states not in our mapping
+  };
 
-     initialiseSVG();
+  d3.csv(CSV_FILE_PATH)
+    .then(function (data) {
+      // Parse numeric values
+      data.forEach((d) => {
+        d.infant_mortality = +d.infant_mortality;
+        d["Black including Hispanic"] = +d["Black including Hispanic"];
+        d["White including Hispanic"] = +d["White including Hispanic"];
+        d["Hispanic All Races"] = +d["Hispanic All Races"];
+        d["All Non-White Races including Hispanic"] =
+          +d["All Non-White Races including Hispanic"];
+        d["Asian/Pacific Islander including Hispanic"] =
+          +d["Asian/Pacific Islander including Hispanic"];
+        d["American Indian/Alaskan Native including Hispanic"] =
+          +d["American Indian/Alaskan Native including Hispanic"];
+        d.median_income = +d.median_income;
+        d.obesity = +d.obesity;
+      });
 
+      initialiseSVG();
 
-     // Set default demographic based on keyframe
-     let selectedDemographic = defaultDemographic;
+      // Set default demographic based on keyframe
+      let selectedDemographic = defaultDemographic;
 
+      // Set up dimensions based on your existing SVG settings
+      const margin = { top: 80, right: 200, bottom: 60, left: 80 };
+      const width = w - margin.left - margin.right;
+      const height = h - margin.top - margin.bottom;
 
-     // Set up dimensions based on your existing SVG settings
-     const margin = { top: 80, right: 200, bottom: 60, left: 80 };
-     const width = w - margin.left - margin.right;
-     const height = h - margin.top - margin.bottom;
+      // Create a group for the main chart area
+      const chartArea = svg
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+      const x = d3.scaleLinear().domain([0, 100]).range([0, width]).nice();
 
-     // Create a group for the main chart area
-     const chartArea = svg
-       .append("g")
-       .attr("transform", `translate(${margin.left}, ${margin.top})`);
+      const y = d3
+        .scaleLinear()
+        .domain([0, d3.max(data, (d) => d.infant_mortality) * 1.1])
+        .range([height, 0])
+        .nice();
 
+      // Create axes
+      const xAxis = chartArea
+        .append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x));
 
-     const x = d3.scaleLinear().domain([0, 100]).range([0, width]).nice();
-
-
-     const y = d3
-       .scaleLinear()
-       .domain([0, d3.max(data, (d) => d.infant_mortality) * 1.1])
-       .range([height, 0])
-       .nice();
-
-
-     // Color scale by state
-     const states = Array.from(new Set(data.map((d) => d.State)));
-     const color = d3.scaleOrdinal().domain(states).range(d3.schemeCategory10);
-
-
-     // Create axes
-     const xAxis = chartArea
-       .append("g")
-       .attr("transform", `translate(0,${height})`)
-       .call(d3.axisBottom(x));
-
-
-     const yAxis = chartArea.append("g").call(d3.axisLeft(y));
+      const yAxis = chartArea.append("g").call(d3.axisLeft(y));
 
       xAxis.selectAll("text").style("font-size", "20px");
       yAxis.selectAll("text").style("font-size", "20px");
-     //Axis
-     chartArea
-       .append("text")
-       .attr("class", "x-axis-label")
-       .attr("text-anchor", "middle")
-       .attr("x", width / 2)
-       .attr("y", height + 40)
-       .attr("font-size", "20px")
-       .text(`${selectedDemographic} (%)`);
-     //Text
-     chartArea
-       .append("text")
-       .attr("class", "y-axis-label")
-       .attr("text-anchor", "middle")
-       .attr("transform", "rotate(-90)")
-       .attr("y", -50)
-       .attr("x", -height / 2)
-       .attr("font-size", "20px")
-       .text("Infant Mortality Rate (per 1,000 live births)");
+      
+      //Axis
+      chartArea
+        .append("text")
+        .attr("class", "x-axis-label")
+        .attr("text-anchor", "middle")
+        .attr("x", width / 2)
+        .attr("y", height + 40)
+        .attr("font-size", "20px")
+        .text(`${selectedDemographic} (%)`);
+      
+      //Text
+      chartArea
+        .append("text")
+        .attr("class", "y-axis-label")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -50)
+        .attr("x", -height / 2)
+        .attr("font-size", "20px")
+        .text("Infant Mortality Rate (per 1,000 live births)");
 
+      // Add title above the chart
+      svg
+        .append("text")
+        .attr("class", "title")
+        .attr("text-anchor", "middle")
+        .attr("x", w / 2)
+        .attr("y", -50)
+        .attr("font-size", "30px")
+        .attr("font-weight", "bold")
+        .text(`Infant Mortality Rates by County: ${selectedDemographic} Population %`);
 
-     // Add title above the chart
-     svg
-       .append("text")
-       .attr("class", "title")
-       .attr("text-anchor", "middle")
-       .attr("x", w / 2)
-       .attr("y", -50)
-       .attr("font-size", "30px")
-       .attr("font-weight", "bold")
-       .text(`Infant Mortality Rates by County:  ${selectedDemographic} Population %`);
+      // Create tooltip
+      let tooltip = d3.select("body").select(".tooltip");
+      if (tooltip.empty()) {
+        tooltip = d3
+          .select("body")
+          .append("div")
+          .attr("class", "tooltip")
+          .style("position", "absolute")
+          .style("background", "rgba(255, 255, 255, 0.9)")
+          .style("padding", "10px")
+          .style("border", "1px solid #ddd")
+          .style("border-radius", "4px")
+          .style("pointer-events", "none")
+          .style("opacity", 0)
+          .style("z-index", "100"); // Ensure tooltip is on top
+      }
 
+      // Function to get color based on state's region
+      const getColorByState = (state) => {
+        const region = stateToRegion[state] || "Unknown";
+        return regionColors[region];
+      };
 
-     // Create tooltip
-     let tooltip = d3.select("body").select(".tooltip");
-     if (tooltip.empty()) {
-       tooltip = d3
-         .select("body")
-         .append("div")
-         .attr("class", "tooltip")
-         .style("position", "absolute")
-         .style("background", "rgba(255, 255, 255, 0.9)")
-         .style("padding", "10px")
-         .style("border", "1px solid #ddd")
-         .style("border-radius", "4px")
-         .style("pointer-events", "none")
-         .style("opacity", 0)
-         .style("z-index", "100"); // Ensure tooltip is on top
-     }
+      // Plot dots
+      const dots = chartArea
+        .selectAll(".dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("class", "dot")
+        .attr("cx", (d) => x(d[selectedDemographic]))
+        .attr("cy", (d) => y(d.infant_mortality))
+        .attr("r", 5)
+        .style("fill", (d) => getColorByState(d.State))
+        .style("opacity", 0.7)
+        .on("mouseover", function (event, d) {
+          // Format the demographic percentage value
+          const demographicValue = d[selectedDemographic]
+            ? d[selectedDemographic].toFixed(1) + "%"
+            : "N/A";
 
+          // Format the infant mortality rate
+          const mortalityValue = d.infant_mortality
+            ? d.infant_mortality.toFixed(2)
+            : "N/A";
 
-     // Plot dots
-     const dots = chartArea
-       .selectAll(".dot")
-       .data(data)
-       .enter()
-       .append("circle")
-       .attr("class", "dot")
-       .attr("cx", (d) => x(d[selectedDemographic]))
-       .attr("cy", (d) => y(d.infant_mortality))
-       .attr("r", 5)
-       .style("fill", (d) => color(d.State))
-       .style("opacity", 0.7)
-       .on("mouseover", function (event, d) {
-         // Format the demographic percentage value
-         const demographicValue = d[selectedDemographic]
-           ? d[selectedDemographic].toFixed(1) + "%"
-           : "N/A";
+          // Format median income with commas
+          const incomeValue = d.median_income
+            ? "$" + d.median_income.toLocaleString()
+            : "N/A";
 
+          // Format obesity percentage
+          const obesityValue = d.obesity ? d.obesity.toFixed(1) + "%" : "N/A";
 
-         // Format the infant mortality rate
-         const mortalityValue = d.infant_mortality
-           ? d.infant_mortality.toFixed(2)
-           : "N/A";
+          // Show the tooltip with enhanced formatting
+          tooltip.transition().duration(200).style("opacity", 0.9);
 
+          tooltip
+            .html(
+              `
+                <div style="font-weight: bold; margin-bottom: 5px;">${d.County}, ${d.State}</div>
+                <div>
+                    <span style="font-weight: bold;">Infant Mortality:</span>
+                    <span>${mortalityValue}</span>
+                </div>
+                <div>
+                    <span style="font-weight: bold;">${selectedDemographic}:</span>
+                    <span>${demographicValue}</span>
+                </div>
+                <div>
+                    <span style="font-weight: bold;">Median Income:</span>
+                    <span>${incomeValue}</span>
+                </div>
+                <div>
+                    <span style="font-weight: bold;">Obesity Rate:</span>
+                    <span>${obesityValue}</span>
+                </div>
+                <div>
+                    <span style="font-weight: bold;">Region:</span>
+                    <span>${stateToRegion[d.State] || "Unknown"}</span>
+                </div>
+            `
+            )
+            .style("left", event.pageX + 15 + "px")
+            .style("top", event.pageY - 28 + "px");
 
-         // Format median income with commas
-         const incomeValue = d.median_income
-           ? "$" + d.median_income.toLocaleString()
-           : "N/A";
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("r", 8)
+            .style("stroke", "#000")
+            .style("stroke-width", 2)
+            .style("opacity", 1);
+        })
+        .on("mouseout", function () {
+          // Hide the tooltip
+          tooltip.transition().duration(500).style("opacity", 0);
 
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("r", 5)
+            .style("stroke", "none")
+            .style("opacity", 0.7);
+        });
 
-         // Format obesity percentage
-         const obesityValue = d.obesity ? d.obesity.toFixed(1) + "%" : "N/A";
+      // Legend - modified to show regions instead of individual states
+      const legendX = margin.left + width + 5;
+      const legendY = margin.top;
 
+      const legend = svg
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(${legendX}, ${legendY})`);
 
-         // Show the tooltip with enhanced formatting
-         tooltip.transition().duration(200).style("opacity", 0.9);
+      // Create legend for regions
+      Object.keys(regionColors).forEach((region, i) => {
+        if (region === "Unknown") return; // Skip "Unknown" region from legend
+        
+        const legendRow = legend
+          .append("g")
+          .attr("transform", `translate(0, ${i * 25})`);
 
+        legendRow
+          .append("rect")
+          .attr("width", 15)
+          .attr("height", 15)
+          .attr("fill", regionColors[region]);
 
-         tooltip
-           .html(
-             `
-                   <div style="font-weight: bold; margin-bottom: 5px;">${d.County}, ${d.State}</div>
-                   <div>
-                       <span style="font-weight: bold;">Infant Mortality:</span>
-                       <span>${mortalityValue}</span>
-                   </div>
-                   <div>
-                       <span style="font-weight: bold;">${selectedDemographic}:</span>
-                       <span>${demographicValue}</span>
-                   </div>
-                   <div>
-                       <span style="font-weight: bold;">Median Income:</span>
-                       <span>${incomeValue}</span>
-                   </div>
-                   <div>
-                       <span style="font-weight: bold;">Obesity Rate:</span>
-                       <span>${obesityValue}</span>
-                   </div>
-               `
-           )
-           .style("left", event.pageX + 15 + "px")
-           .style("top", event.pageY - 28 + "px");
+        legendRow
+          .append("text")
+          .attr("x", 25)
+          .attr("y", 12)
+          .attr("text-anchor", "start")
+          .style("font-size", "20px")
+          .text(region);
+      });
 
+      // Add demographic selector inside the SVG
+      const demographics = [
+        "All Non-White Races including Hispanic",
+        "Black including Hispanic",
+        "White including Hispanic",
+        "Hispanic All Races",
+        "Asian/Pacific Islander including Hispanic",
+        "American Indian/Alaskan Native including Hispanic",
+      ];
 
-         d3.select(this)
-           .transition()
-           .duration(200)
-           .attr("r", 8)
-           .style("stroke", "#000")
-           .style("stroke-width", 2)
-           .style("opacity", 1);
-       })
-       .on("mouseout", function () {
-         // Hide the tooltip
-         tooltip.transition().duration(500).style("opacity", 0);
+      // Create a dropdown container inside the SVG
+      const dropdownG = svg
+        .append("g")
+        .attr("class", "dropdown-container")
+        .attr("transform", `translate(${margin.left}, ${h + 10})`);
 
+      // Add label 
+      dropdownG
+        .append("text")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("dominant-baseline", "middle")
+        .attr("font-size", "22px")
+        .text("Select Demographic: ");
 
-         d3.select(this)
-           .transition()
-           .duration(200)
-           .attr("r", 5)
-           .style("stroke", "none")
-           .style("opacity", 0.7);
-       });
+      // Create HTML dropdown
+      const fo = dropdownG
+        .append("foreignObject")
+        .attr("x", 200)
+        .attr("y", -15)
+        .attr("width", 350)
+        .attr("height", 40);
 
+      const select = fo
+        .append("xhtml:select")
+        .attr("id", "demographic-select")
+        .style("font-size", "16px") 
+        .style("padding", "2px")
+        .style("width", "100%")
+        .on("change", function () {
+          selectedDemographic = this.value;
+          updateChart(selectedDemographic);
+        });
 
-     // Legend
-     const legendX = margin.left + width + 5;
-     const legendY = margin.top;
+      // Add options to dropdown
+      demographics.forEach((demographic) => {
+        select
+          .append("xhtml:option")
+          .attr("value", demographic)
+          .property("selected", demographic === selectedDemographic)
+          .text(demographic);
+      });
 
+      // Function to update chart based on selected demographic
+      function updateChart(demographic) {
+        // Keep X scale fixed from 0-100%
+        x.domain([0, 100]).nice();
+        xAxis.transition().duration(1000).call(d3.axisBottom(x));
 
-     const legend = svg
-       .append("g")
-       .attr("class", "legend")
-       .attr("transform", `translate(${legendX}, ${legendY})`);
+        // Update dots
+        dots
+          .transition()
+          .duration(1000)
+          .attr("cx", (d) => x(d[demographic]));
 
+        // Update axis label
+        chartArea.select(".x-axis-label").text(`${demographic} (%)`);
 
-     // Show only first 15 states to avoid cutoff
-     const legendStates = states.slice(0, 15);
-     if (states.length > 15) {
-       legendStates.push("Other States");
-     }
-
-
-     legendStates.forEach((state, i) => {
-       const legendRow = legend
-         .append("g")
-         .attr("transform", `translate(0, ${i * 20})`);
-
-
-       legendRow
-         .append("rect")
-         .attr("width", 10)
-         .attr("height", 10)
-         .attr("fill", color(state));
-
-
-       legendRow
-         .append("text")
-         .attr("x", 15)
-         .attr("y", 9)
-         .attr("text-anchor", "start")
-         .style("text-transform", "capitalize")
-         .style("font-size", "20px")
-         .text(state);
-     });
-
-
-     // Add demographic selector inside the SVG
-     const demographics = [
-       "All Non-White Races including Hispanic",
-       "Black including Hispanic",
-       "White including Hispanic",
-       "Hispanic All Races",
-       "Asian/Pacific Islander including Hispanic",
-       "American Indian/Alaskan Native including Hispanic",
-     ];
-
-
-     // Create a dropdown container inside the SVG
-     const dropdownG = svg
-       .append("g")
-       .attr("class", "dropdown-container")
-       .attr("transform", `translate(${margin.left}, ${h + 10})`);
-
-
-     // Add label 
-     dropdownG
-       .append("text")
-       .attr("x", 0)
-       .attr("y", 0)
-       .attr("dominant-baseline", "middle")
-       .attr("font-size", "22px")
-       .text("Select Demographic: ");
-
-
-     // Create HTML dropdown
-     const fo = dropdownG
-       .append("foreignObject")
-       .attr("x", 200)
-       .attr("y", -15)
-       .attr("width", 350)
-       .attr("height", 40);
-
-
-     const select = fo
-       .append("xhtml:select")
-       .attr("id", "demographic-select")
-       .style("font-size", "16px") 
-       .style("padding", "2px")
-       .style("width", "100%")
-       .on("change", function () {
-         selectedDemographic = this.value;
-         updateChart(selectedDemographic);
-       });
-
-
-     // Add options to dropdown
-     demographics.forEach((demographic) => {
-       select
-         .append("xhtml:option")
-         .attr("value", demographic)
-         .property("selected", demographic === selectedDemographic)
-         .text(demographic);
-     });
-
-
-     // Function to update chart based on selected demographic
-     function updateChart(demographic) {
-       // Keep X scale fixed from 0-100%
-       x.domain([0, 100]).nice();
-       xAxis.transition().duration(1000).call(d3.axisBottom(x));
-
-
-       // Update dots
-       dots
-         .transition()
-         .duration(1000)
-         .attr("cx", (d) => x(d[demographic]));
-
-
-       // Update axis label
-       chartArea.select(".x-axis-label").text(`${demographic} (%)`);
-
-
-       // Update title
-       svg
-         .select(".title")
-         .text(`Infant Mortality Rates by County: ${demographic} Population %`);
-     }
-   })
-   .catch((error) => {
-     console.error("Error loading or processing data:", error);
-   });
+        // Update title
+        svg
+          .select(".title")
+          .text(`Infant Mortality Rates by County: ${demographic} Population %`);
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading or processing data:", error);
+    });
 }
-
 // Update visualization based on the current keyframe
 function updateVisualization() {
   let keyframe = keyframes[keyframeIndex];
