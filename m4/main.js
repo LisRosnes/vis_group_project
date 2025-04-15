@@ -355,18 +355,13 @@ async function loadData() {
       chartArea, 
       width, 
       height, 
-      "Average Infant Mortality by US State",
+      "Average Infant Mortality by US State (2016-2020)",
       "State", 
       "Infant Mortality Rate (per 1,000 live births)"
     );
     chartArea.select(".x-axis-label")
       .attr("y", height + 200)
       .attr("font-size", TEXT_STYLES.AXIS_LABEL_SIZE);
-    d3.select("#sort-select")
-      .style("font-size", "10px");
-    
-    d3.select("#sort-select-label")
-      .style("font-size", "12px");
  
     // Add legend for party colors with standardized text size
     const legendData = [

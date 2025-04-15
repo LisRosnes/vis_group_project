@@ -146,7 +146,7 @@ footer {
 }
 
 #sort-select {
-  font-size: 1.8rem;   /* Increase text size */
+  font-size: 14px;   /* Increase text size */
   padding: 0.5rem;     /* Add more padding around the text */
   width: 25%;         /* Make it expand to the full width of its container */
   border-radius: 4px;  /* Optional: smooth out the corners */
@@ -191,7 +191,7 @@ footer {
   font-size: 18px;
   display: block;
   margin-bottom: 10px;
-=======
+}
 /* Interactive experience button (verse 5) */
 .interactive-button {
   margin-top: 1rem;
