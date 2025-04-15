@@ -1042,7 +1042,7 @@ function raceDeathVis() {
       let selectedDemographic = defaultDemographic;
 
       // Set up dimensions based on your existing SVG settings
-      const margin = { top: 80, right: 200, bottom: 60, left: 80 };
+      const margin = { top: 80, right: 200, bottom: 130, left: 80 }; // Increased bottom margin for citation
       const width = w - margin.left - margin.right;
       const height = h - margin.top - margin.bottom;
 
@@ -1079,10 +1079,53 @@ function raceDeathVis() {
         chartArea, 
         width, 
         height, 
-        `Infant Mortality Rates by County: ${selectedDemographic} Population %`,
+        `Infant Mortality Rates by County: ${selectedDemographic} Population % (2016-2020)`,
         `${selectedDemographic} (%)`, 
         "Infant Mortality Rate (per 1,000 live births)"
       );
+
+      // Function to get the figure number based on demographic
+      function getFigureNumber(demographic) {
+        if (demographic === "Black including Hispanic") {
+          return "Figure 3";
+        } else if (demographic === "All Non-White Races including Hispanic") {
+          return "Figure 5";
+        } else if (demographic === "White including Hispanic") {
+          return "Figure 7";
+        } else if (demographic === "Hispanic All Races") {
+          return "Figure 8";
+        } else {
+          return "Figure 9";
+        }
+      }
+
+      const citationText = chartArea.append("text")
+        .attr("class", "citation-text")
+        .attr("x", width / 2)
+        .attr("y", height + 150) 
+        .attr("text-anchor", "middle")
+        .style("font-size", "24px") 
+        .style("font-style", "italic")
+        .style("fill", "#666");
+
+      const citationText2 = chartArea.append("text")
+        .attr("class", "citation-text-2")
+        .attr("x", width / 2)
+        .attr("y", height + 175) 
+        .attr("text-anchor", "middle")
+        .style("font-size", "24px")
+        .style("font-style", "italic")
+        .style("fill", "#666");
+
+      // Set initial citation text
+      updateCitation(selectedDemographic);
+
+      function updateCitation(demographic) {
+        const figureNum = getFigureNumber(demographic);
+        citationText.text(`${figureNum}: Graph by Humphrey Amoakohene using data from the CDC National Environmental Public Health Tracking Network (2016–2020).`);
+        citationText2.text(`Infant mortality rates by county in relation to ${demographic} population percentage, grouped by U.S. region.`);
+      }
+      
 
       // Create tooltip
       let tooltip = d3.select("body").select(".tooltip");
@@ -1243,28 +1286,29 @@ function raceDeathVis() {
       dropdownG
         .append("text")
         .attr("x", 0)
-        .attr("y", 0)
+        .attr("y", 150)
         .attr("dominant-baseline", "middle")
-        .attr("font-size", '20px')
+        .attr("font-size", '40px')
         .text("Select Demographic: ");
 
       // Create HTML dropdown
       const fo = dropdownG
         .append("foreignObject")
-        .attr("x", 200)
-        .attr("y", -15)
+        .attr("x", 380)
+        .attr("y", 130)
         .attr("width", 350)
         .attr("height", 40);
 
       const select = fo
         .append("xhtml:select")
         .attr("id", "demographic-select")
-        .style("font-size", TEXT_STYLES.DROPDOWN_TEXT_SIZE) 
+        .style("font-size", '25px') 
         .style("padding", "2px")
         .style("width", "100%")
         .on("change", function () {
           selectedDemographic = this.value;
           updateChart(selectedDemographic);
+          updateCitation(selectedDemographic); // Update citation when demographic changes
         });
 
       // Add options to dropdown
@@ -1294,7 +1338,7 @@ function raceDeathVis() {
         // Update title
         svg
           .select(".title")
-          .text(`Infant Mortality Rates by County: ${demographic} Population %`);
+          .text(`Infant Mortality Rates by County: ${demographic} Population % (2016-2020)`);
       }
     })
     .catch((error) => {
