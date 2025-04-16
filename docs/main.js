@@ -41,8 +41,8 @@ let keyframes = [
 },
  {
    activeVerse: 6,
-   activeLines: [1, 2, 3, 4, 5],
-   svgUpdate: guessTheRateVis,
+   activeLines: [1, 2, 3, 4, 5]
+  //  svgUpdate: guessTheRateVis,
  },
 ];
 
