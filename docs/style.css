@@ -35,6 +35,7 @@ body {
   background-color: #373737;
   color: #efebeb;
   font-size: 1.5rem;
+  overflow: hidden;
 }
  /* Header styles */
 header {
