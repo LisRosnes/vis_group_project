@@ -18,6 +18,12 @@
   text-align: center;
 }
 
+#state-sort-container {
+  display: flex;
+  margin-left: 120px;
+  margin-top: 3rem;
+}
+
 .center-only .right-column {
   display: none;
 }
@@ -146,9 +152,10 @@ footer {
 }
 
 #sort-select {
+  text-align: center;
   font-size: 14px;   /* Increase text size */
   padding: 0.5rem;     /* Add more padding around the text */
-  width: 25%;         /* Make it expand to the full width of its container */
+  width: 30%;         /* Make it expand to the full width of its container */
   border-radius: 4px;  /* Optional: smooth out the corners */
 }
 

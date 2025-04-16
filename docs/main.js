@@ -97,7 +97,7 @@ function applyStandardTextStyles(svg, chartArea, width, height, title, xLabel, y
 }
 
 // Set width, height, and padding for the plot
-const w = 2000;
+const w = 1600;
 const h = 700;
 const padding = 30;
 
@@ -247,20 +247,20 @@ async function loadData() {
       // Sort states from highest to lowest infant mortality rate
       stateData.sort((a, b) => b.avg_infant_mortality - a.avg_infant_mortality);
     } else if (sortOption === "party") {
-      // Define fixed order for parties: Republican (red) first, Democrat (blue) second.
+      // Fixed order: Republican first, Democrat second.
       const partyOrder = { "Republican": 0, "Democrat": 1 };
       stateData.sort((a, b) => {
          const partyA = statePoliticalParty[a.state] || "";
          const partyB = statePoliticalParty[b.state] || "";
-         // If in the same party, sort descending by infant mortality rate.
+         // If same party, sort descending by rate
          if (partyA === partyB) {
               return b.avg_infant_mortality - a.avg_infant_mortality;
          }
-         // Otherwise, sort by our fixed party order.
          return (partyOrder[partyA] ?? 2) - (partyOrder[partyB] ?? 2);
       });
     }
     
+    // (Re)initialize SVG
     initialiseSVG();
  
     const margin = { top: 80, right: 20, bottom: 60, left: 80 };
@@ -282,7 +282,7 @@ async function loadData() {
       .domain([0, d3.max(stateData, (d) => d.avg_infant_mortality)])
       .range([height, 0]);
  
-    // Bars with fill color based on political party
+    // Create bars with fill color based on party affiliation
     chartArea
       .selectAll(".bar")
       .data(stateData)
@@ -313,14 +313,14 @@ async function loadData() {
           
         tooltip.html(
           `<strong>${d.state}</strong><br>
-          Avg Infant Mortality: ${d.avg_infant_mortality.toFixed(2)}`
+           Avg Infant Mortality: ${d.avg_infant_mortality.toFixed(2)}`
         )
         .style("left", event.pageX + "px")
         .style("top", event.pageY - 28 + "px");
       })
       .on("mousemove", function(event) {
         tooltip.style("left", event.pageX + "px")
-              .style("top", event.pageY - 28 + "px");
+               .style("top", event.pageY - 28 + "px");
       })
       .on("mouseout", function() {
         d3.select(this)
@@ -333,6 +333,7 @@ async function loadData() {
           .style("opacity", 0);
       });
  
+    // Add X-axis and rotate tick labels
     const xAxis = chartArea
       .append("g")
       .attr("transform", `translate(0,${height})`)
@@ -344,13 +345,14 @@ async function loadData() {
       .style("text-anchor", "end")
       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
  
+    // Add Y-axis
     const yAxis = chartArea
       .append("g")
       .call(d3.axisLeft(yScale));
     yAxis.selectAll("text")
       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
  
-    // Apply standardized text styles
+    // Apply standardized text styles (title and axis labels)
     applyStandardTextStyles(
       svg, 
       chartArea, 
@@ -360,11 +362,12 @@ async function loadData() {
       "State", 
       "Infant Mortality Rate (per 1,000 live births)"
     );
+    // (Optionally) adjust the x-axis label position if needed
     chartArea.select(".x-axis-label")
       .attr("y", height + 200)
       .attr("font-size", TEXT_STYLES.AXIS_LABEL_SIZE);
  
-    // Add legend for party colors with standardized text size
+    // Add legend for party colors
     const legendData = [
       { party: "Republican", color: "red" },
       { party: "Democrat", color: "blue" }, 
@@ -392,10 +395,18 @@ async function loadData() {
       .attr("y", (d, i) => i * 30 + 15)
       .text(d => d.party)
       .style("font-size", TEXT_STYLES.LEGEND_TEXT_SIZE);
- 
-    // If sorting by party, this calculates the average for each
+
+    chartArea.append("text")
+      .attr("class", "caption")
+      .attr("x", width / 2)
+      .attr("y", height + 250)  
+      .attr("text-anchor", "middle")
+      .style("font-size", "24px")
+      .style("font-style", "italic")
+      .style("fill", "#666")
+      .text("Figure 1: Graph by Elisa Rosnes using data from the CDC National Environmental Public Health Tracking Network (2016–2020).");
+
     if (sortOption === "party") {
-      // Calculate average infant mortality per party
       const partyAvg = Array.from(
         d3.rollup(
           stateData,
@@ -406,13 +417,11 @@ async function loadData() {
       );
       
       partyAvg.forEach(({ party, avg }) => {
-        // Get all states of this party
         const statesOfParty = stateData.filter(d => statePoliticalParty[d.state] === party);
         const xValues = statesOfParty.map(d => xScale(d.state));
         const minX = d3.min(xValues);
         const maxX = d3.max(xValues) + xScale.bandwidth();
         
-        // horizontal dashed line representing average of each party
         chartArea.append("line")
           .attr("x1", minX)
           .attr("x2", maxX)
@@ -422,7 +431,6 @@ async function loadData() {
           .attr("stroke-dasharray", "4")
           .attr("stroke-width", 2);
           
-        // text label for the average of each party with standardized size
         chartArea.append("text")
           .attr("x", (minX + maxX) / 2)
           .attr("y", yScale(avg) - 5)
@@ -433,6 +441,7 @@ async function loadData() {
     }
   });
 }
+
 
 function incomeDeathVis() {
   d3.csv(CSV_FILE_PATH).then(function (data) {
@@ -533,6 +542,19 @@ function incomeDeathVis() {
       .attr("class", "summary-label")
       .attr("text-anchor", "middle")
       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
+    
+      svg.append("foreignObject")
+      .attr("x", 60)
+      .attr("y", height + 250)
+      .attr("width", width)
+      .attr("height", 100)
+      .append("xhtml:div")
+      .style("font-size", "24px")
+      .style("font-style", "italic")
+      .style("color", "#666")
+      .style("word-wrap", "break-word")
+      .html("Figure 2: Graph by Elisa Rosnes using data from the CDC National Environmental Public Health Tracking Network (2016–2020). Showing the min and max infant mortality rates for the selected income bucket.");
+
   
     // Update the vertical bar when the slider is moved.
     incomeSlider.on("input", function () {
