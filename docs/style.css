@@ -4,12 +4,31 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+.center-only {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Full viewport height */
+}
+
+.center-only .left-column {
+  width: 100%;
+  text-align: center;
+}
+
+.center-only .right-column {
+  display: none;
+}
+
  /* Body and overall typography */
 body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
-  background-color: #fdfdfd;
-  color: #333;
+  background-color: #373737;
+  color: #efebeb;
+  font-size: 1.5rem;
 }
  /* Header styles */
 header {
@@ -34,40 +53,49 @@ header {
   margin-bottom: 1rem;
 }
  /* Left column styles */
-.left-column {
+ .left-column {
   width: 40%;
   padding: 1rem;
+  height: 700px;  /* Set this to match the SVG container's height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
  /* Right column styles */
-.right-column {
+ .right-column {
   width: 55%;
   padding: 1rem;
+  color: black;
+  margin-right: 60px; /* Adjust this value as needed */
 }
+
  /* Ensure content in columns doesn't stretch too wide */
-.left-column-content,
-.middle-page-content {
+ .left-column-content {
   max-width: 600px;
   margin: 0 auto;
+  text-align: center; 
+  
 }
- /* Verse styling */
-.verse {
-  list-style: none;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-}
+
+
  /* Line styling */
 .line {
   margin: 0.5rem 0;
 }
- /* Highlight the active verse and lines */
-.active-verse {
-  background-color: #eef;
-  border-left: 4px solid #0088cc;
-  padding-left: 0.5rem;
+
+.verse {
+  display: none; 
+  list-style-type: none; 
+  padding-left: 0; 
 }
+
+.active-verse {
+  display: block;
+}
+
  .active-line {
   font-weight: bold;
-  color: #c00;
+  color: rgb(249, 49, 49);
 }
  /* Footer styling */
 footer {
@@ -75,16 +103,30 @@ footer {
   padding: 1rem;
 }
  /* Arrow button styling */
-.arrow-button {
+ .arrow-button {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
   background: #222;
   color: #fff;
   border: none;
   padding: 0.5rem 1rem;
-  margin: 0.5rem;
   cursor: pointer;
   font-size: 1.2rem;
   transition: background 0.3s ease;
 }
+
+
+/* Position the left arrow on the left side */
+#backward-button {
+  left: 1rem;
+}
+
+/* Position the right arrow on the right side */
+#forward-button {
+  right: 1rem;
+}
+
  .arrow-button:hover {
   background: #555;
 }
@@ -93,8 +135,76 @@ footer {
   width: 100%;
   height: 700px;
   border: 1px solid #ccc;
-  background: #fff;
+  background: #cbc9c9;
   box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.4); 
   border-radius: 8px; 
 }
 
+.tooltip {
+  font-size: 1rem;
+  color: #333;
+}
+
+#sort-select {
+  font-size: 14px;   /* Increase text size */
+  padding: 0.5rem;     /* Add more padding around the text */
+  width: 25%;         /* Make it expand to the full width of its container */
+  border-radius: 4px;  /* Optional: smooth out the corners */
+}
+
+
+
+/* Container for the slider placed in .right-column */
+#income-slider-container {
+  width: 100%;            
+  margin-top: 20px;        
+  text-align: center;
+  padding: 10px;
+  background: #fff;  
+  border: 1px solid #ccc;
+}
+
+/* Make the slider larger */
+#income-slider-container input[type="range"] {
+  -webkit-appearance: none; 
+  appearance: none;
+  width: 90%;         
+  height: 12px;          
+  background: #ddd;
+  outline: none;
+  border-radius: 5px;
+  margin: 10px auto;
+}
+
+/* Style for the slider thumb on WebKit browsers */
+#income-slider-container input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;           
+  height: 24px;
+  border-radius: 50%;     
+  background: #555;
+  cursor: pointer;
+}
+
+#income-slider-container label {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 10px;
+}
+/* Interactive experience button (verse 5) */
+.interactive-button {
+  margin-top: 1rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 30px;
+  background-color: #f04e4e;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.interactive-button:hover {
+  background-color: #d93b3b;
+ }
