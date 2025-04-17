@@ -49,7 +49,7 @@ let keyframes = [
 // Standardized text styles for all visualizations
 const TEXT_STYLES = {
   // Font sizes
-  TITLE_SIZE: "40px",
+  TITLE_SIZE: "30px",
   AXIS_LABEL_SIZE: "34px",
   AXIS_TEXT_SIZE: "24px",
   LEGEND_TEXT_SIZE: "30px",
