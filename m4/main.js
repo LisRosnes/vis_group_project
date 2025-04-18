@@ -113,7 +113,7 @@ let tooltip = d3.select("body")
   .style("opacity", 0);
 
 let svg = d3.select("#svg");
-let keyframeIndex = 0;
+let keyframeIndex = 7;
 
 function initialiseSVG() {
  svg
@@ -580,40 +580,41 @@ function incomeDeathVis() {
 function guessTheRateVis() {
   // Clear the SVG container
   svg.selectAll("*").remove();
-
+  const maxGuess = 10;
   const gameWidth = w;
-  const gameHeight = h;
+  const gameYoffset = 200;
+  const gameHeight = h+gameYoffset;
 
   const fallbackSteps = [
     {
       topText: "Welcome to 'Guess the Rate'",
-      bottomText: "Each icon represents 1 baby death per 1,000 births. Click to guess rates in different regions.",
-      numIcons: 10,
+      bottomText: "Each icon represents 1 death per 1,000 live births. Click to guess.",
+      numIcons: 1,
       isGuess: false,
     },
     {
-      topText: "What is the average infant mortality rate across the U.S.?",
+      topText: "Guess the average infant mortality rate across the U.S.?",
       bottomText: "Click how many infants (out of 1,000 births) you think don't survive, on average.",
-      numIcons: 10,
+      numIcons: maxGuess,
       isGuess: true,
       correctAnswer: 6,  // placeholder
     },
     {
-      topText: "Now guess the rate in counties with higher median incomes.",
+      topText: "Guess the average rate among counties with higher median incomes.",
       bottomText: "These are the top 20% of counties by income. What do you think the average is?",
-      numIcons: 10,
+      numIcons: maxGuess,
       isGuess: true,
       correctAnswer: 4, // placeholder
     },
     {
-      topText: "Now guess the rate in counties with lower median incomes.",
-      bottomText: "These are the bottom 20% of counties by income. What do you think the average is?",
-      numIcons: 10,
+      topText: "Guess the average rate among counties with lower median incomes.",
+      bottomText: "These are the bottom 20% of counties by income.",
+      numIcons: maxGuess,
       isGuess: true,
       correctAnswer: 9, // placeholder
     },
     {
-      topText: "Thanks for exploring these disparities",
+      topText: "",
       bottomText: "Click ► to continue with the poem.",
       numIcons: 0,
       isGuess: false,
@@ -624,7 +625,9 @@ function guessTheRateVis() {
   function startGame(steps) {
     let currentStep = 0;
     let userGuess = 0;
-
+    const titleModify = 1.5;
+    const titleSizeRaw = parseInt(TEXT_STYLES.TITLE_SIZE, 10) * titleModify;
+    const titleSize = titleSizeRaw + "px";
     const gameGroup = svg.append("g").attr("class", "game-group");
 
     gameGroup.append("rect")
@@ -640,7 +643,7 @@ function guessTheRateVis() {
       .attr("x", gameWidth / 2)
       .attr("y", 80)
       .attr("text-anchor", "middle")
-      .attr("font-size", TEXT_STYLES.TITLE_SIZE)
+      .attr("font-size", titleSize)
       .attr("font-weight", "bold")
       .attr("fill", "#333")
       .text("");
@@ -648,12 +651,15 @@ function guessTheRateVis() {
     const bottomText = gameGroup.append("text")
       .attr("class", "game-bottom-text")
       .attr("x", gameWidth / 2)
-      .attr("y", gameHeight - 80)
+      .attr("y", gameHeight - 200)
       .attr("text-anchor", "middle")
       .attr("font-size", TEXT_STYLES.AXIS_LABEL_SIZE)
       .attr("fill", "#333")
       .text("");
 
+    const modify = 1.5;
+    const fontSizeRaw = parseInt(TEXT_STYLES.AXIS_TEXT_SIZE, 10) * modify;
+    const fontSize = fontSizeRaw + "px";
     const nextButton = gameGroup.append("g")
       .attr("class", "next-button")
       .attr("transform", `translate(${gameWidth/2}, ${gameHeight - 40})`)
@@ -672,15 +678,15 @@ function guessTheRateVis() {
       .attr("text-anchor", "middle")
       .attr("dy", 5)
       .attr("fill", "white")
-      .attr("font-size", TEXT_STYLES.AXIS_TEXT_SIZE)
+      .attr("font-size", fontSize)
       .text("Next");
 
     const infoText = gameGroup.append("text")
       .attr("class", "info-text")
       .attr("x", gameWidth / 2)
-      .attr("y", gameHeight - 120)
+      .attr("y", gameHeight/4)
       .attr("text-anchor", "middle")
-      .attr("font-size", TEXT_STYLES.AXIS_TEXT_SIZE)
+      .attr("font-size", fontSize)
       .attr("fill", "#555")
       .attr("opacity", 0)
       .text("");
@@ -698,47 +704,63 @@ function guessTheRateVis() {
 
       if (step.numIcons === 0) return;
 
-      const iconsGroup = gameGroup.append("g").attr("class", "icons-group");
-      const iconSize = 60;
-      const iconPadding = 20;
+      // 1) size constants
+      const iconSize    = 150;          // total bounding box per icon
+      const iconPadding = 30;           // space between icons
+      const circleRadius = iconSize * 0.35;
+      const rectWidth    = iconSize * 0.4;
+      const rectHeight   = iconSize * 0.5;
+      const rectCorner   = circleRadius * 0.3;
+    
+      // 2) positioning
       const startX = (gameWidth - (step.numIcons * (iconSize + iconPadding) - iconPadding)) / 2;
-      const iconY = gameHeight / 2 - 50;
-
+      const iconY   = gameHeight / 2 - (iconSize / 2);
+    
+      // 3) append group & bind data
+      const iconsGroup = gameGroup
+        .append("g")
+        .attr("class", "icons-group");
+    
       const icons = iconsGroup.selectAll(".icon")
         .data(d3.range(step.numIcons))
         .enter()
         .append("g")
-        .attr("class", d => `icon icon-${d}`)
-        .attr("transform", (d, i) => `translate(${startX + i * (iconSize + iconPadding)}, ${iconY})`)
-        .style("cursor", step.isGuess ? "pointer" : "default")
-        .style("opacity", 1);
-
-      icons.each(function(d, i) {
+          .attr("class", d => `icon icon-${d}`)
+          .attr("transform", (d,i) => `translate(${startX + i*(iconSize + iconPadding)}, ${iconY})`)
+          .style("cursor", step.isGuess ? "pointer" : "default");
+    
+      // 4) draw each with scalable dimensions
+      icons.each(function(_, i) {
         const icon = d3.select(this);
+    
+        // head
         icon.append("circle")
-          .attr("cx", iconSize / 2)
-          .attr("cy", iconSize / 3)
-          .attr("r", 12)
+          .attr("cx", iconSize/2)
+          .attr("cy", circleRadius)
+          .attr("r", circleRadius)
           .attr("fill", "#3498db");
-
+    
+        // body
         icon.append("rect")
-          .attr("x", iconSize / 2 - 8)
-          .attr("y", iconSize / 3 + 15)
-          .attr("width", 16)
-          .attr("height", 25)
-          .attr("rx", 5)
-          .attr("ry", 5)
+          .attr("x", iconSize/2 - rectWidth/2)
+          .attr("y", circleRadius*2)
+          .attr("width", rectWidth)
+          .attr("height", rectHeight)
+          .attr("rx", rectCorner)
+          .attr("ry", rectCorner)
           .attr("fill", "#3498db");
-
+    
+        // label
         icon.append("text")
-          .attr("x", iconSize / 2)
-          .attr("y", iconSize / 3 + 60)
+          .attr("x", iconSize/2)
+          .attr("y", circleRadius*2 + rectHeight + rectHeight/2)
           .attr("text-anchor", "middle")
-          .attr("font-size", TEXT_STYLES.TOOLTIP_TEXT_SIZE)
+          .attr("font-size", circleRadius * 0.8)
           .attr("fill", "#555")
           .text(i + 1);
       });
-
+    
+      // then set up interaction if needed
       if (step.isGuess) {
         setupGuessInteraction(icons, step.correctAnswer, step.actualRate);
       }
@@ -757,7 +779,7 @@ function guessTheRateVis() {
             .attr("fill", iconIndex < userGuess ? "#e74c3c" : "#3498db");
         });
 
-        bottomText.text(`You selected ${userGuess} out of 10. Click Next to continue.`);
+        bottomText.text(`You selected ${userGuess} out of ${guessMax}. Click Next to continue.`);
         nextButton.on("click", () => checkAnswer(userGuess, correctAnswer, actualRate));
       });
 
@@ -775,22 +797,22 @@ function guessTheRateVis() {
       const difference = Math.abs(guess - correct);
     
       let feedbackText = guess === correct
-        ? "✓ Correct! That's exactly right."
+        ? "✓ Correct."
         : difference <= 1
-        ? "Almost! Very close to the correct answer."
+        ? "Almost."
         : guess > correct
-        ? "Your guess was too high."
-        : "Your guess was too low.";
+        ? "Too high."
+        : "Not high enough.";
     
       let rateDetail = actualRate
         ? ` (${actualRate.toFixed(1)} deaths per 1,000 births)`
         : "";
     
       let note = (currentStep === 2 || currentStep === 3)
-        ? " Note: This is an average — individual counties in this group may vary widely (especially in lower income)."
+        ? " Counties may vary widely (especially in lower income)."
         : "";
     
-      infoText.text(`${feedbackText} The correct answer is ${correct}${rateDetail}.${note}`)
+      infoText.text(`${feedbackText} The answer is ${correct}${rateDetail}.${note}`)
         .transition()
         .duration(500)
         .attr("opacity", 1);
