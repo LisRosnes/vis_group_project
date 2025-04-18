@@ -113,7 +113,7 @@ let tooltip = d3.select("body")
   .style("opacity", 0);
 
 let svg = d3.select("#svg");
-let keyframeIndex = 7;
+let keyframeIndex = 0;
 
 function initialiseSVG() {
  svg
