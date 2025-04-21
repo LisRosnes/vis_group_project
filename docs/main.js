@@ -1484,7 +1484,7 @@ function raceDeathVis() {
       const dropdownG = svg
         .append("g")
         .attr("class", "dropdown-container")
-        .attr("transform", `translate(${margin.left}, ${h + 80})`)
+        .attr("transform", `translate(${margin.left}, ${margin.top + height + 90})`)
         .attr("font-size", '20px');
 
       // Add label with standardized size
