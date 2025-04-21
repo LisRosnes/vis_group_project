@@ -705,7 +705,7 @@ function guessTheRateVis() {
       if (step.numIcons === 0) return;
 
       // 1) size constants
-      const iconSize    = 150;          // total bounding box per icon
+      const iconSize    = 100;          // total bounding box per icon
       const iconPadding = 30;           // space between icons
       const circleRadius = iconSize * 0.35;
       const rectWidth    = iconSize * 0.4;
