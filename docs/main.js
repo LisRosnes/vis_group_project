@@ -458,7 +458,7 @@ function incomeDeathVis() {
     const incomeExtent = d3.extent(data, d => d.median_income);
     initialiseSVG();
  
-    const margin = { top: 120, right: 80, bottom: 60, left: 80 }; // Increased top margin for dropdown
+    const margin = { top: 120, right: 80, bottom: 60, left: 80 };
     const width = w - margin.left - margin.right;
     const height = h - margin.top - margin.bottom;
  
@@ -470,25 +470,25 @@ function incomeDeathVis() {
     const dropdownContainer = svg.append("foreignObject")
       .attr("x", margin.left)
       .attr("y", 20)
-      .attr("width", 300) // Increased width for dropdown
-      .attr("height", 80); // Increased height
+      .attr("width", 300)
+      .attr("height", 80); 
     
     const dropdownDiv = dropdownContainer.append("xhtml:div")
-      .style("overflow", "visible"); // Ensure dropdown options are visible
+      .style("overflow", "visible");
     
     dropdownDiv.append("label")
       .attr("for", "demographic-select")
       .style("font-size", TEXT_STYLES.DROPDOWN_LABEL_SIZE)
       .style("margin-right", "10px")
-      .style("display", "block") // Make label a block element
-      .style("margin-bottom", "5px") // Add space below label
+      .style("display", "block") 
+      .style("margin-bottom", "5px") 
       .text("Color By Demographics:");
     
     const dropdown = dropdownDiv.append("select")
       .attr("id", "demographic-select")
       .style("font-size", TEXT_STYLES.DROPDOWN_LABEL_SIZE)
       .style("padding", "4px")
-      .style("width", "250px"); // Set fixed width for dropdown
+      .style("width", "250px"); 
     
     // Add demographic options
     const demographics = [
@@ -510,13 +510,13 @@ function incomeDeathVis() {
       .domain([incomeExtent[0], incomeExtent[1]])
       .range([0, width]);
  
-    // Define yScale based on infant mortality
+    // yScale based on infant mortality
     let yScale = d3
       .scaleLinear()
       .domain([0, d3.max(data, (d) => d.infant_mortality)])
       .range([height, 0]);
  
-    // X-axis with standardized text size
+    // X-axis
     const xAxis = chartArea
       .append("g")
       .attr("transform", `translate(0,${height})`)
@@ -524,14 +524,13 @@ function incomeDeathVis() {
     xAxis.selectAll("text")
       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
  
-    // Y-axis with standardized text size
+    // Y-axis 
     const yAxis = chartArea
       .append("g")
       .call(d3.axisLeft(yScale));
     yAxis.selectAll("text")
       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
  
-    // Apply standardized text styles
     applyStandardTextStyles(
       svg, 
       chartArea, 
@@ -542,19 +541,19 @@ function incomeDeathVis() {
       "Infant Mortality Rate (per 1,000 live births)"
     );
     
-    // Create color legend group with increased size
-    const legendWidth = 250; // Increased width
-    const legendHeight = 30;  // Increased height
+    // color legend group 
+    const legendWidth = 350; 
+    const legendHeight = 30;  
     
     const legendGroup = chartArea.append("g")
       .attr("class", "color-legend")
       .attr("transform", `translate(${width - legendWidth - 10}, 10)`)
-      .style("opacity", 0); // Initially hidden
+      .style("opacity", 0); 
     
     legendGroup.append("text")
       .attr("class", "legend-title")
-      .attr("y", -15)
-      .style("font-size", "14px") // Increased font size
+      .attr("y", -20)
+      .style("font-size", "20px") // Increased font size
       .style("font-weight", "bold");
     
     // Add legend gradient rectangle
@@ -571,7 +570,7 @@ function incomeDeathVis() {
       .attr("height", legendHeight)
       .style("fill", "url(#legend-gradient)");
     
-    // Add legend axis with increased font size
+    // legend axis
     const legendScale = d3.scaleLinear()
       .range([0, legendWidth]);
     
@@ -583,8 +582,8 @@ function incomeDeathVis() {
       .attr("class", "legend-axis")
       .attr("transform", `translate(0, ${legendHeight})`)
       .call(legendAxis)
-      .selectAll("text")
-      .style("font-size", "12px"); // Increased font size
+      .style("font-size", 20)
+      .selectAll("text");
       
     // Plot the scatter points for each county
     const circlesGroup = chartArea.append("g").attr("class", "circles-group");
@@ -606,7 +605,7 @@ function incomeDeathVis() {
         .attr("id", "income-slider-container");
     }
     
-    // label for the slider with standardized text size
+    // label for the slider
     const sliderLabel = sliderContainer.append("label")
       .attr("for", "incomeSlider")
       .style("font-size", TEXT_STYLES.DROPDOWN_LABEL_SIZE)
@@ -625,8 +624,8 @@ function incomeDeathVis() {
     const barWidth = 125; 
     let summaryBar = chartArea.append("rect")
       .attr("class", "summary-bar")
-      .attr("fill", "orange")
-      .attr("opacity", 0.3);
+      .attr("fill", "grey")
+      .attr("opacity", 0.2);
   
     // label to display the min and max infant mortality values
     let summaryLabel = chartArea.append("text")
@@ -644,15 +643,14 @@ function incomeDeathVis() {
       .style("font-style", "italic")
       .style("color", "#666")
       .style("word-wrap", "break-word")
-      .html("Figure 2: Graph by Elisa Rosnes using data from the CDC National Environmental Public Health Tracking Network (2016–2020). Showing the min and max infant mortality rates for the selected income bucket.");
+      .html("Figure 2: Graph by Elisa Rosnes using data from the CDC National Environmental Public Health Tracking Network (2016–2020). Showing the min and max infant mortality rates for the selected income bucket. And color gradient by race percentage per county");
 
-    // Color configurations for different demographics 
     const colorConfigs = {
       "african-american": { field: "Black including Hispanic", colors: ["yellow", "red"] },
       "hispanic": { field: "Hispanic All Races", colors: ["yellow", "red"] },
-      "white": { field: "White including Hispanic", colors: ["lightblue", "darkblue"] },
-      "non-white": { field: "All Non-White Races including Hispanic", colors: ["orange", "brown"] },
-      "asian-pi": { field: "Asian/Pacific Islander including Hispanic", colors: ["lightgreen", "teal"] }
+      "white": { field: "White including Hispanic", colors: ["yellow", "red"] },
+      "non-white": { field: "All Non-White Races including Hispanic", colors: ["yellow", "red"] },
+      "asian-pi": { field: "Asian/Pacific Islander including Hispanic", colors: ["yellow", "red"] }
     };
 
     // Function to update the visualization based on demographic selection
@@ -767,163 +765,6 @@ function incomeDeathVis() {
     updateVisualization("default");
   });
 }
-// function incomeDeathVis() {
-//   d3.csv(CSV_FILE_PATH).then(function (data) {
-//     // Convert infant_mortality to numbers
-//     data.forEach((d) => {
-//       d.median_income = +d.median_income;
-//       d.infant_mortality = +d.infant_mortality;
-//     });
-//     const incomeExtent = d3.extent(data, d => d.median_income);
-//     initialiseSVG();
- 
-//     const margin = { top: 80, right: 80, bottom: 60, left: 80 };
-//     const width = w - margin.left - margin.right;
-//     const height = h - margin.top - margin.bottom;
- 
-//     const chartArea = svg
-//       .append("g")
-//       .attr("transform", `translate(${margin.left}, ${margin.top})`);
- 
-//     const xScale = d3.scaleLinear()
-//       .domain([incomeExtent[0], incomeExtent[1]])
-//       .range([0, width]);
- 
-//     // Define yScale based on infant mortality
-//     let yScale = d3
-//       .scaleLinear()
-//       .domain([0, d3.max(data, (d) => d.infant_mortality)])
-//       .range([height, 0]);
- 
-//     // X-axis with standardized text size
-//     const xAxis = chartArea
-//       .append("g")
-//       .attr("transform", `translate(0,${height})`)
-//       .call(d3.axisBottom(xScale));
-//     xAxis.selectAll("text")
-//       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
- 
-//     // Y-axis with standardized text size
-//     const yAxis = chartArea
-//       .append("g")
-//       .call(d3.axisLeft(yScale));
-//     yAxis.selectAll("text")
-//       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
- 
-//     // Apply standardized text styles
-//     applyStandardTextStyles(
-//       svg, 
-//       chartArea, 
-//       width, 
-//       height, 
-//       "Infant Mortality by US Counties' Median Income",
-//       "Median Income ($)", 
-//       "Infant Mortality Rate (per 1,000 live births)"
-//     );
-      
-//     // Plot the scatter points for each county
-//     chartArea.selectAll("circle")
-//       .data(data, d => d.County)
-//       .enter()
-//       .append("circle")
-//       .attr("cx", d => xScale(d.median_income))
-//       .attr("cy", d => yScale(d.infant_mortality))
-//       .attr("r", 5)
-//       .attr("fill", "steelblue")
-//       .attr("fill-opacity", 0.4);
-  
-//     let sliderContainer = d3.select(".right-column").select("#income-slider-container");
-//     if (sliderContainer.empty()) {
-//       sliderContainer = d3.select(".right-column")
-//         .append("div")
-//         .attr("id", "income-slider-container");
-//     }
-    
-//     // label for the slider with standardized text size
-//     const sliderLabel = sliderContainer.append("label")
-//       .attr("for", "incomeSlider")
-//       .style("font-size", TEXT_STYLES.DROPDOWN_LABEL_SIZE)
-//       .text(`Slide Right to Improve Your Fate: $${incomeExtent[0]} - $${incomeExtent[0] + 10000}`);
-  
-//     // Slider element with step size 10,000
-//     const incomeSlider = sliderContainer.append("input")
-//       .attr("type", "range")
-//       .attr("id", "incomeSlider")
-//       .attr("min", incomeExtent[0])
-//       .attr("max", incomeExtent[1] - 10000) 
-//       .attr("value", incomeExtent[0])
-//       .attr("step", 10000);
-  
-//     // vertical bar that represents the min/max mortality for the selected income bucket
-//     const barWidth = 125; 
-//     let summaryBar = chartArea.append("rect")
-//       .attr("class", "summary-bar")
-//       .attr("fill", "orange")
-//       .attr("opacity", 0.3);
-  
-//     // label to display the min and max infant mortality values
-//     let summaryLabel = chartArea.append("text")
-//       .attr("class", "summary-label")
-//       .attr("text-anchor", "middle")
-//       .style("font-size", TEXT_STYLES.AXIS_TEXT_SIZE);
-    
-//       svg.append("foreignObject")
-//       .attr("x", 60)
-//       .attr("y", height + 250)
-//       .attr("width", width)
-//       .attr("height", 100)
-//       .append("xhtml:div")
-//       .style("font-size", "24px")
-//       .style("font-style", "italic")
-//       .style("color", "#666")
-//       .style("word-wrap", "break-word")
-//       .html("Figure 2: Graph by Elisa Rosnes using data from the CDC National Environmental Public Health Tracking Network (2016–2020). Showing the min and max infant mortality rates for the selected income bucket.");
-
-  
-//     // Update the vertical bar when the slider is moved.
-//     incomeSlider.on("input", function () {
-//       const lowerBound = +this.value;
-//       const upperBound = lowerBound + 10000;
-      
-//       sliderLabel.text(`Slide Right to Improve Your Fate: $${lowerBound} - $${upperBound}`)
-//         .style("font-size", TEXT_STYLES.DROPDOWN_LABEL_SIZE);  
-      
-//       // Filter the data for counties within this income bracket and with infant mortality > 0
-//       const filteredData = data.filter(d => 
-//         d.median_income >= lowerBound &&
-//         d.median_income < upperBound &&
-//         d.infant_mortality > 0
-//       );
-      
-//       if (filteredData.length > 0) {
-//         // Compute the min and max infant mortality
-//         const minMortality = d3.min(filteredData, d => d.infant_mortality);
-//         const maxMortality = d3.max(filteredData, d => d.infant_mortality);
-        
-//         // vertical bar positioned at the midpoint of the income bucket
-//         const midIncome = lowerBound + 5000;
-        
-//         summaryBar.transition().duration(500)
-//           .attr("x", xScale(midIncome) - barWidth / 2)
-//           .attr("width", barWidth)
-//           .attr("y", yScale(maxMortality))
-//           .attr("height", yScale(minMortality) - yScale(maxMortality));
-        
-//         summaryLabel.transition().duration(500)
-//           .attr("x", xScale(midIncome))
-//           .attr("y", yScale(maxMortality) - 10)
-//           .text(`Min: ${minMortality.toFixed(2)} | Max: ${maxMortality.toFixed(2)}`);
-//       } else {
-//         // If no data exists for the selected range then hide summary bar
-//         summaryBar.transition().duration(500)
-//           .attr("height", 0);
-//         summaryLabel.transition().duration(500)
-//           .text("No data");
-//       }
-//     });
-//   });
-// }
-
 function guessTheRateVis() {
   // Clear the SVG container
   svg.selectAll("*").remove();
