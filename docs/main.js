@@ -824,17 +824,41 @@ function guessTheRateVis() {
       .attr("fill", "#f5f5f5")
       .attr("rx", 10)
       .attr("ry", 10);
-
-    // Standardize text sizes
-    const topText = gameGroup.append("text")
-      .attr("class", "game-top-text")
+      
+    // Add citation text
+    gameGroup.append("text")
+      .attr("class", "caption")
       .attr("x", gameWidth / 2)
-      .attr("y", 80)
+      .attr("y", gameHeight - 100)  
+      .attr("text-anchor", "middle")
+      .style("font-size", "24px")
+      .style("font-style", "italic")
+      .style("fill", "#666")
+      .text("Figure 6: Interactive game by Conner Yoon using data from the CDC National Environmental Public Health Tracking Network (2016–2020).");
+
+    // Create a text wrapper for multi-line top text
+    const topTextWrapper = gameGroup.append("g")
+      .attr("class", "top-text-wrapper")
+      .attr("transform", `translate(${gameWidth / 2}, 80)`);
+    
+    // Add background for better visibility (optional)
+    topTextWrapper.append("rect")
+      .attr("class", "text-bg")
+      .attr("x", -gameWidth/2 + 100)
+      .attr("y", -40)
+      .attr("width", gameWidth - 200)
+      .attr("height", 80)
+      .attr("fill", "none")
+      .attr("rx", 5)
+      .attr("ry", 5);
+    
+    // Main top text that will support wrapping
+    const topText = topTextWrapper.append("text")
+      .attr("class", "game-top-text")
       .attr("text-anchor", "middle")
       .attr("font-size", titleSize)
       .attr("font-weight", "bold")
-      .attr("fill", "#333")
-      .text("");
+      .attr("fill", "#333");
 
     const bottomText = gameGroup.append("text")
       .attr("class", "game-bottom-text")
@@ -844,7 +868,7 @@ function guessTheRateVis() {
       .attr("font-size", TEXT_STYLES.AXIS_LABEL_SIZE)
       .attr("fill", "#333")
       .text("");
-
+      
     const modify = 1.5;
     const fontSizeRaw = parseInt(TEXT_STYLES.AXIS_TEXT_SIZE, 10) * modify;
     const fontSize = fontSizeRaw + "px";
@@ -861,6 +885,7 @@ function guessTheRateVis() {
       .attr("rx", 20)
       .attr("ry", 20)
       .attr("fill", "#3498db");
+      
 
     nextButton.append("text")
       .attr("text-anchor", "middle")
@@ -868,6 +893,7 @@ function guessTheRateVis() {
       .attr("fill", "white")
       .attr("font-size", fontSize)
       .text("Next");
+      
 
     const infoText = gameGroup.append("text")
       .attr("class", "info-text")
@@ -878,10 +904,81 @@ function guessTheRateVis() {
       .attr("fill", "#555")
       .attr("opacity", 0)
       .text("");
+    
+    // Helper function to wrap text
+    function wrapText(text, width) {
+      const words = text.split(/\s+/);
+      let line = [];
+      let lineNumber = 0;
+      const lineHeight = 1.1; // ems
+      const y = 0;
+      let tspan = topText.append("tspan")
+        .attr("x", 0)
+        .attr("y", y)
+        .attr("dy", 0);
+      
+      let lineLength = 0;
+      
+      words.forEach(word => {
+        line.push(word);
+        tspan.text(line.join(" "));
+        
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = topText.append("tspan")
+            .attr("x", 0)
+            .attr("y", y)
+            .attr("dy", ++lineNumber * lineHeight + "em")
+            .text(word);
+        }
+      });
+    }
+
+    // Helper function to wrap text for info/feedback text
+    function wrapInfoText(text, maxWidth) {
+      infoText.text(""); // Clear existing content
+      
+      const words = text.split(/\s+/);
+      let line = [];
+      let lineNumber = 0;
+      const lineHeight = 1.1; // ems
+      let tspan = infoText.append("tspan")
+        .attr("x", gameWidth / 2)
+        .attr("y", gameHeight/4)
+        .attr("text-anchor", "middle");
+      
+      words.forEach(word => {
+        line.push(word);
+        tspan.text(line.join(" "));
+        
+        if (tspan.node().getComputedTextLength() > maxWidth) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = infoText.append("tspan")
+            .attr("x", gameWidth / 2)
+            .attr("y", gameHeight/4)
+            .attr("dy", ++lineNumber * lineHeight + "em")
+            .attr("text-anchor", "middle")
+            .text(word);
+        }
+      });
+    }
 
     function drawStep(stepIndex) {
       const step = steps[stepIndex];
-      topText.text(step.topText);
+      
+      // Clear previous text
+      topText.selectAll("*").remove();
+      topText.text("");
+      
+      // Add and wrap the top text if it exists
+      if (step.topText) {
+        wrapText(step.topText, gameWidth - 200);
+      }
+      
       bottomText.text(step.bottomText);
       infoText.attr("opacity", 0);
       userGuess = 0;
@@ -967,7 +1064,7 @@ function guessTheRateVis() {
             .attr("fill", iconIndex < userGuess ? "#e74c3c" : "#3498db");
         });
 
-        bottomText.text(`You selected ${userGuess} out of ${guessMax}. Click Next to continue.`);
+        bottomText.text(`You selected ${userGuess} out of ${maxGuess}. Click Next to continue.`);
         nextButton.on("click", () => checkAnswer(userGuess, correctAnswer, actualRate));
       });
 
@@ -1000,8 +1097,11 @@ function guessTheRateVis() {
         ? " Counties may vary widely (especially in lower income)."
         : "";
     
-      infoText.text(`${feedbackText} The answer is ${correct}${rateDetail}.${note}`)
-        .transition()
+      // Updated to use text wrapping function instead of direct text setting
+      const feedbackContent = `${feedbackText} The answer is ${correct}${rateDetail}.${note}`;
+      wrapInfoText(feedbackContent, gameWidth - 200);
+      
+      infoText.transition()
         .duration(500)
         .attr("opacity", 1);
     
@@ -1108,17 +1208,23 @@ function obesityDeathVis() {
       .range(rangeLabels);
 
     // Group data by obesity percentile and calculate average infant mortality
+    // Enhanced to store more statistics for each group
     const groupedData = Array.from(
       d3.group(data, (d) => obesityPercentiles(d.obesity)),
       ([percentile, values]) => ({
         percentile,
         avgInfantMortality: d3.mean(values, (d) => d.infant_mortality),
+        countiesCount: values.length,
+        minMortality: d3.min(values, d => d.infant_mortality),
+        maxMortality: d3.max(values, d => d.infant_mortality),
+        medianMortality: d3.median(values, d => d.infant_mortality),
+        avgObesity: d3.mean(values, d => d.obesity)
       })
     ).sort((a, b) => a.percentile.localeCompare(b.percentile));
 
     initialiseSVG();
 
-    const margin = { top: 80, right: 20, bottom: 60, left: 80 };
+    const margin = { top: 80, right: 20, bottom: 180, left: 80 }; // Increased bottom margin for citation
     const width = w - margin.left - margin.right;
     const height = h - margin.top - margin.bottom;
 
@@ -1144,7 +1250,24 @@ function obesityDeathVis() {
       .domain([0, groupedData.length - 1])
       .range(["#add8e6", "#00008b"]); // Light blue to dark blue
 
-    // Create bars
+    // Make sure tooltip exists
+    let tooltip = d3.select("body").select(".tooltip");
+    if (tooltip.empty()) {
+      tooltip = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("background", "rgba(255, 255, 255, 0.9)")
+        .style("padding", "10px")
+        .style("border", "1px solid #ddd")
+        .style("border-radius", "4px")
+        .style("pointer-events", "none")
+        .style("opacity", 0)
+        .style("z-index", "100"); // Ensure tooltip is on top
+    }
+    
+    // Create bars with hover effects
     chartArea
       .selectAll(".bar")
       .data(groupedData)
@@ -1155,7 +1278,68 @@ function obesityDeathVis() {
       .attr("y", (d) => yScale(d.avgInfantMortality))
       .attr("width", xScale.bandwidth())
       .attr("height", (d) => height - yScale(d.avgInfantMortality))
-      .attr("fill", (d, i) => colorScale(i));
+      .attr("fill", (d, i) => colorScale(i))
+      .on("mouseover", function(event, d) {
+        // Highlight the hovered bar
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("stroke", "#000")
+          .attr("stroke-width", 2)
+          .attr("fill-opacity", 0.8);
+          
+        // Show tooltip with detailed information
+        tooltip.transition()
+          .duration(200)
+          .style("opacity", 0.9);
+          
+        // Format the tooltip content with comprehensive statistics
+        tooltip.html(`
+          <div style="font-weight: bold; margin-bottom: 5px;">Obesity Percentile: ${d.percentile}</div>
+          <div>
+            <span style="font-weight: bold;">Avg Infant Mortality:</span>
+            <span>${d.avgInfantMortality.toFixed(2)} per 1,000</span>
+          </div>
+          <div>
+            <span style="font-weight: bold;">Range:</span>
+            <span>${d.minMortality.toFixed(2)} - ${d.maxMortality.toFixed(2)}</span>
+          </div>
+          <div>
+            <span style="font-weight: bold;">Median:</span>
+            <span>${d.medianMortality.toFixed(2)}</span>
+          </div>
+          <div>
+            <span style="font-weight: bold;">Avg Obesity Rate:</span>
+            <span>${d.avgObesity.toFixed(1)}%</span>
+          </div>
+          <div>
+            <span style="font-weight: bold;">Counties in group:</span>
+            <span>${d.countiesCount}</span>
+          </div>
+        `)
+        .style("left", (event.pageX + 15) + "px")
+        .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mousemove", function(event) {
+        // Make tooltip follow the mouse
+        tooltip
+          .style("left", (event.pageX + 15) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function() {
+        // Reset bar style when not hovering
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("stroke", null)
+          .attr("stroke-width", 0)
+          .attr("fill-opacity", 1);
+          
+        // Hide tooltip
+        tooltip.transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
 
     // Add axes with standardized text size
     const xAxis = d3.axisBottom(xScale);
@@ -1183,6 +1367,27 @@ function obesityDeathVis() {
       "Relative National Obesity Percentile", 
       "Average Infant Mortality Rate (per 1,000 live births)"
     );
+    
+    // Add citation text
+    chartArea.append("text")
+      .attr("class", "caption")
+      .attr("x", width / 2)
+      .attr("y", height + 150)  // Increased vertical position
+      .attr("text-anchor", "middle")
+      .style("font-size", "24px")
+      .style("font-style", "italic")
+      .style("fill", "#666")
+      .text("Figure 4: Graph by Conner Yoon using data from the CDC National Environmental Public Health Tracking Network (2016–2020).");
+      
+    chartArea.append("text")
+      .attr("class", "caption-detail")
+      .attr("x", width / 2)
+      .attr("y", height + 180)  // Increased vertical position
+      .attr("text-anchor", "middle")
+      .style("font-size", "24px")
+      .style("font-style", "italic")
+      .style("fill", "#666")
+      .text("Average infant mortality rates by county grouped by relative obesity percentile.");
   });
 }
 
